@@ -158,33 +158,40 @@ __device__ float Jfac(const int l, const float b)
 }
 
 __host__ __device__ float g0(float b) {
+  const float tol = 1e-7f;
 
-  float tol = 1.e-7;
-  float tk, b2, b2sq;
-  float g, x, xi, err;
+  if (b < tol) return 1.0f;
 
-  if (b < tol) {return 1.0;}
+  // For small b: use the stable power series expansion of I0
+  if (b < 15.0f) {
+      float x = 0.5f * b;
+      float t = 1.0f;
+      float sum = 1.0f;
+      float k = 1.0f;
 
-  b2 = 0.5 * b;
-  b2sq = b2 * b2;
-  tk = expf(-b);
-  g = tk;
+      float xsq = x * x;
 
-  x = 1.;
-  err = 1.;
-  
-  while (err > tol) {
-    xi = 1./x;
-    tk  = tk * b2sq * xi * xi;
-    g += tk;
-    x  += 1.;
-    err = fabsf(tk/g);
+      // Series for I0(b) = sum (x^(2k) / (k!)^2)
+      // We compute terms via recurrence to avoid factorials.
+      do {
+          t *= xsq / (k * k);   // multiply previous term by (x^2 / k^2)
+          sum += t;
+          k += 1.0f;
+      } while (fabsf(t) > tol * sum);
+
+      return expf(-b) * sum;
   }
-  
-  if (g<tol) g=tol; 
-  return g;
 
+  // For large b: use asymptotic expansion I0(b) ~ exp(b)/sqrt(2*pi*b)
+  // so g0(b) = I0(b)/exp(b) ~ 1/sqrt(2*pi*b)
+  float invsqrt = 1.0f / sqrtf(2.0f * 3.14159265358979f * b);
+
+  // Add two correction terms of uniform asymptotic expansion
+  float t1 = 1.0f + 1.0f / (8.0f * b) + 9.0f / (128.0f * b * b);
+
+  return invsqrt * t1;
 }
+
 
 __host__ __device__ float g1(float b) {
 
@@ -1834,8 +1841,13 @@ __global__ void Wphi_summand(float* p2, const cuComplex* phi, const float* volJa
       if (idy==0) fac = 1.0;
 
       float b_s = kperp2[idxyz]*rho2_s;
+      float g0_s = g0(b_s);
+      //for (int l=0; l < nl; l++) {
+      //  const float Jl = Jflr(l, b_s);
+      //  g0_s += Jl*Jl;
+      //}
 
-      cuComplex tmp = cuConjf( phi[idxyz] ) * ( 1.0 - g0(b_s) ) * phi[idxyz] * fac * volJac[idz];
+      cuComplex tmp = cuConjf( phi[idxyz] ) * ( 1.0 - g0_s ) * phi[idxyz] * fac * volJac[idz];
       p2[idxyz] = 0.5 * tmp.x;
 
     } else {
