@@ -878,7 +878,7 @@ def vmec_fieldlines(
     d_iota_d_s_1 = (
         -(iota_input / (2 * s)) * s_hat_input + (iota / (2 * s)) * shat
     ) * np.ones((ns,))
-    sfac = shat / s_hat_input
+    sfac = s_hat_input / shat
 
     if include_shear_variation == False:
         d_iota_d_s_1 = 0*d_iota_d_s_1
@@ -954,7 +954,7 @@ def vmec_fieldlines(
         * (modB_b * d_B_b_d_s + mu_0 * d_pressure_d_s[:, None, None])
         * 1
         / edge_toroidal_flux_over_2pi
-        - beta_b
+        + beta_b
         / (
             2
             * sqrt_g_booz
