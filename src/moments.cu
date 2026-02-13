@@ -774,6 +774,12 @@ void MomentsG::restart_read(double* time)
   if (retval = nc_get_var(ncres, id_time, time)) ERR(retval);
   if (retval = nc_close(ncres)) ERR(retval);
 
+  if (isnan(time[0]) || isinf(time[0]) || fabs(time[0]) >= 1e10) {
+    fprintf(stderr, "RESTART ERROR: time variable contains invalid or uninitialized value: %e\n", time[0]);
+    exit(1);
+  }
+  DEBUG_PRINT("Restart time = %f\n", time[0]);
+
   scale = pars_->scale;
 
   if (!pars_->domain_change) {

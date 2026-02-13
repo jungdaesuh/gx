@@ -673,6 +673,7 @@ void Diagnostics::restart_write(MomentsG** G, double *time)
   if (retval = nc_def_var(ncres, "G",    NC_FLOAT, 7, moments_out, &id_G)) ERR(retval);
   if (retval = nc_def_var(ncres, "time", NC_DOUBLE, 0, 0, &id_time)) ERR(retval);
   if (retval = nc_enddef(ncres)) ERR(retval);
+  if (retval = nc_var_par_access(ncres, id_G, NC_COLLECTIVE)) ERR(retval);
 
   // write time
   if (retval = nc_put_var(ncres, id_time, time)) ERR(retval);
