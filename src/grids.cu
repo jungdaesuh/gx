@@ -304,6 +304,7 @@ void Grids::init_ks_and_coords()
   // Estimate v_parallel_max conservatively
   vpar_max = 2.0 * sqrtf( Nm_glob );
   muB_max = laguerre->get_vmax();
+  muB_maxJ = laguerre->get_vmax_J();
   kx_max = kx_h[(Nx-1)/3];
   ky_max = ky_h[(Ny-1)/3];
   kz_max = kz_h[Nz/2];

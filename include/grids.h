@@ -51,7 +51,7 @@ class Grids {
   float * theta0_h ;
   float * th0; 
   float Zp;
-  float kx_max, ky_max, kz_max, vpar_max, muB_max;
+  float kx_max, ky_max, kz_max, vpar_max, muB_max, muB_maxJ;
   int m0_max;
   float kperp_min;
 

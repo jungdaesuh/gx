@@ -23,6 +23,7 @@ class LaguerreTransform {
   float * get_toSpectral() {return toSpectral;}
   float * get_roots() {return roots;}
   float get_vmax() {return vmax;}
+  float get_vmax_J() {return vmax_J;}
   const int L;
   const int J;
 
@@ -32,7 +33,7 @@ class LaguerreTransform {
   float * toSpectral ;
   float * roots      ;
   float vmax;
-
+  float vmax_J;
   void initTransforms(float* toGrid, float* toSpectral, float* roots);
 
   cublasHandle_t handle;
