@@ -15,12 +15,13 @@ python gx_geo_vmec.py <vmec_filename(with .nc)> 0 <desired output name>
 A portion of this script is based on Matt Landreman's vmec_geometry module for the SIMSOPT framework.
 For axisymmetric equilibria, make sure that ntor > 1 in the VMEC wout file.
 
-Author: Rahul Gaur (rgaur@terpmail.umd.ed)
+Author: Rahul Gaur (rgaur@terpmail.umd.edu)
 Modified: Noah Mandell 
 """
 
 import sys
 import os
+import pdb
 
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline, PPoly, CubicSpline
@@ -334,18 +335,47 @@ def vmec_splines(nc_obj, booz_obj):
     results.Ifun = InterpolatedUnivariateSpline(s_half_grid, booz_obj.Boozer_I)
 
     # Useful 1d profiles:
+    s_pressure = np.concatenate((s_half_grid, s_full_grid))
+    pressure = np.concatenate(
+        (
+            np.asarray(nc_obj.variables["pres"][1:], dtype=float),
+            np.asarray(nc_obj.variables["presf"][:], dtype=float),
+        )
+    )
+    pressure_sort_order = np.argsort(s_pressure)
     results.pressure = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["pres"][1:]
+        s_pressure[pressure_sort_order], pressure[pressure_sort_order]
     )
     results.d_pressure_d_s = results.pressure.derivative()
+
+    phi_full_grid = np.asarray(nc_obj.variables["phi"][:], dtype=float)
+    s_psi = np.concatenate((s_half_grid, s_full_grid))
+    psi = np.concatenate(
+        (
+            0.5 * (phi_full_grid[:-1] + phi_full_grid[1:]) / (2 * np.pi),
+            phi_full_grid / (2 * np.pi),
+        )
+    )
+    psi_sort_order = np.argsort(s_psi)
     results.psi = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["phi"][1:] / (2 * np.pi)
+        s_psi[psi_sort_order], psi[psi_sort_order]
     )
     results.d_psi_d_s = results.psi.derivative()
+
+    s_iota = np.concatenate((s_half_grid, s_full_grid))
+    iota = np.concatenate(
+        (
+            np.asarray(nc_obj.variables["iotas"][1:], dtype=float),
+            np.asarray(nc_obj.variables["iotaf"][:], dtype=float),
+        )
+    )
+    iota_sort_order = np.argsort(s_iota)
     results.iota = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["iotas"][1:]
+        s_iota[iota_sort_order], iota[iota_sort_order]
     )
     results.d_iota_d_s = results.iota.derivative()
+
+    #pdb.set_trace()
 
     # Save other useful quantities:
     results.phiedge = nc_obj.variables["phi"][-1].data
@@ -517,6 +547,7 @@ def vmec_fieldlines(
     edge_toroidal_flux_over_2pi = -vs.phiedge / (2 * np.pi)
     toroidal_flux_sign = np.sign(edge_toroidal_flux_over_2pi)
     B_reference = 2 * abs(edge_toroidal_flux_over_2pi) / (L_reference * L_reference)
+    dpsidrho = 2 * sqrt_s * edge_toroidal_flux_over_2pi
 
     xm_b = vs.xm_b
     xn_b = vs.xn_b
@@ -822,6 +853,17 @@ def vmec_fieldlines(
     g_sup_psi_psi_2D = grad_psi_X_2D**2 + grad_psi_Y_2D**2 + grad_psi_Z_2D**2
     g_sup_psi_psi_2D_inv = 1 / g_sup_psi_psi_2D
 
+    surfavg_grho = np.sqrt((
+        simps(
+            [
+                simps(g_sup_psi_psi_1D, x=theta_b_grid)
+                for g_sup_psi_psi_1D in g_sup_psi_psi_2D[0][0]
+            ],
+            x=phi_b_grid,
+        )
+        / (2 * np.pi) ** 2
+    ))/dpsidrho
+
     lam_over_g_sup_psi_psi_2D = lambda_b_2D * g_sup_psi_psi_2D_inv
 
     # Flux surface integrals D1 and D2 are needed to locally vary the gradients of a 3D equilibrium.
@@ -878,7 +920,7 @@ def vmec_fieldlines(
     d_iota_d_s_1 = (
         -(iota_input / (2 * s)) * s_hat_input + (iota / (2 * s)) * shat
     ) * np.ones((ns,))
-    sfac = s_hat_input / shat
+    sfac = shat / s_hat_input
 
     if include_shear_variation == False:
         d_iota_d_s_1 = 0*d_iota_d_s_1
@@ -954,7 +996,7 @@ def vmec_fieldlines(
         * (modB_b * d_B_b_d_s + mu_0 * d_pressure_d_s[:, None, None])
         * 1
         / edge_toroidal_flux_over_2pi
-        + beta_b
+        - beta_b
         / (
             2
             * sqrt_g_booz
@@ -1015,6 +1057,7 @@ def vmec_fieldlines(
         g_sup_psi_psi
         / (L_reference * L_reference * B_reference * B_reference * s[:, None, None])
     )
+
 
     gbdrift0 = (
         -1.0
@@ -1084,7 +1127,8 @@ def vmec_fieldlines(
         "grad_y",
         "grad_x",
         "zeta_center",
-        "nfp"
+        "nfp",
+        "surfavg_grho",
     ]
 
     for v in variables:
@@ -1130,6 +1174,7 @@ gds21 = geo_coeffs.gds21[0][0]
 gds22 = geo_coeffs.gds22[0][0]
 R = geo_coeffs.R_b[0][0]
 Z = geo_coeffs.Z_b[0][0]
+theta_PEST_test = geo_coeffs.theta_PEST[0][0]
 grho = geo_coeffs.grho[0][0]
 alpha = geo_coeffs.alpha
 zeta_center = geo_coeffs.zeta_center
@@ -1377,6 +1422,7 @@ try:
         "i4",
     )
 
+    pdb.set_trace()
     theta_nc[:] = theta_GX[:]
     theta_PEST_nc[:] = theta_PEST[:]
     bmag_nc[:] = bmag_GX[:]
