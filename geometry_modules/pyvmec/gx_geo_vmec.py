@@ -335,6 +335,9 @@ def vmec_splines(nc_obj, booz_obj):
     results.Ifun = InterpolatedUnivariateSpline(s_half_grid, booz_obj.Boozer_I)
 
     # Useful 1d profiles:
+    # It is advised to used a medium to high radial resolution VMEC file (ns>=128)
+    # to ensure that you get accurate radial derivatives.
+    # See issue for more details: https://github.com/PlasmaControl/DESC/issues/2241
     s_pressure = np.concatenate((s_half_grid, s_full_grid))
     pressure = np.concatenate(
         (
