@@ -378,8 +378,6 @@ def vmec_splines(nc_obj, booz_obj):
     )
     results.d_iota_d_s = results.iota.derivative()
 
-    #pdb.set_trace()
-
     # Save other useful quantities:
     results.phiedge = nc_obj.variables["phi"][-1].data
     variables = ["Aminor_p", "nfp", "raxis_cc", "mpol", "ntor"]
@@ -856,17 +854,6 @@ def vmec_fieldlines(
     g_sup_psi_psi_2D = grad_psi_X_2D**2 + grad_psi_Y_2D**2 + grad_psi_Z_2D**2
     g_sup_psi_psi_2D_inv = 1 / g_sup_psi_psi_2D
 
-    surfavg_grho = np.sqrt((
-        simps(
-            [
-                simps(g_sup_psi_psi_1D, x=theta_b_grid)
-                for g_sup_psi_psi_1D in g_sup_psi_psi_2D[0][0]
-            ],
-            x=phi_b_grid,
-        )
-        / (2 * np.pi) ** 2
-    ))/dpsidrho
-
     lam_over_g_sup_psi_psi_2D = lambda_b_2D * g_sup_psi_psi_2D_inv
 
     # Flux surface integrals D1 and D2 are needed to locally vary the gradients of a 3D equilibrium.
@@ -923,7 +910,7 @@ def vmec_fieldlines(
     d_iota_d_s_1 = (
         -(iota_input / (2 * s)) * s_hat_input + (iota / (2 * s)) * shat
     ) * np.ones((ns,))
-    sfac = shat / s_hat_input
+    sfac = s_hat_input / shat
 
     if include_shear_variation == False:
         d_iota_d_s_1 = 0*d_iota_d_s_1
@@ -999,7 +986,7 @@ def vmec_fieldlines(
         * (modB_b * d_B_b_d_s + mu_0 * d_pressure_d_s[:, None, None])
         * 1
         / edge_toroidal_flux_over_2pi
-        - beta_b
+        + beta_b
         / (
             2
             * sqrt_g_booz
@@ -1131,7 +1118,6 @@ def vmec_fieldlines(
         "grad_x",
         "zeta_center",
         "nfp",
-        "surfavg_grho",
     ]
 
     for v in variables:
@@ -1425,7 +1411,6 @@ try:
         "i4",
     )
 
-    pdb.set_trace()
     theta_nc[:] = theta_GX[:]
     theta_PEST_nc[:] = theta_PEST[:]
     bmag_nc[:] = bmag_GX[:]
