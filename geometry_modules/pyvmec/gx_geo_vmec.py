@@ -15,12 +15,13 @@ python gx_geo_vmec.py <vmec_filename(with .nc)> 0 <desired output name>
 A portion of this script is based on Matt Landreman's vmec_geometry module for the SIMSOPT framework.
 For axisymmetric equilibria, make sure that ntor > 1 in the VMEC wout file.
 
-Author: Rahul Gaur (rgaur@terpmail.umd.ed)
+Author: Rahul Gaur (rgaur@terpmail.umd.edu)
 Modified: Noah Mandell 
 """
 
 import sys
 import os
+import pdb
 
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline, PPoly, CubicSpline
@@ -334,16 +335,46 @@ def vmec_splines(nc_obj, booz_obj):
     results.Ifun = InterpolatedUnivariateSpline(s_half_grid, booz_obj.Boozer_I)
 
     # Useful 1d profiles:
+    # It is advised to used a medium to high radial resolution VMEC file (ns>=128)
+    # to ensure that you get accurate radial derivatives.
+    # See issue for more details: https://github.com/PlasmaControl/DESC/issues/2241
+    s_pressure = np.concatenate((s_half_grid, s_full_grid))
+    pressure = np.concatenate(
+        (
+            np.asarray(nc_obj.variables["pres"][1:], dtype=float),
+            np.asarray(nc_obj.variables["presf"][:], dtype=float),
+        )
+    )
+    pressure_sort_order = np.argsort(s_pressure)
     results.pressure = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["pres"][1:]
+        s_pressure[pressure_sort_order], pressure[pressure_sort_order]
     )
     results.d_pressure_d_s = results.pressure.derivative()
+
+    phi_full_grid = np.asarray(nc_obj.variables["phi"][:], dtype=float)
+    s_psi = np.concatenate((s_half_grid, s_full_grid))
+    psi = np.concatenate(
+        (
+            0.5 * (phi_full_grid[:-1] + phi_full_grid[1:]) / (2 * np.pi),
+            phi_full_grid / (2 * np.pi),
+        )
+    )
+    psi_sort_order = np.argsort(s_psi)
     results.psi = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["phi"][1:] / (2 * np.pi)
+        s_psi[psi_sort_order], psi[psi_sort_order]
     )
     results.d_psi_d_s = results.psi.derivative()
+
+    s_iota = np.concatenate((s_half_grid, s_full_grid))
+    iota = np.concatenate(
+        (
+            np.asarray(nc_obj.variables["iotas"][1:], dtype=float),
+            np.asarray(nc_obj.variables["iotaf"][:], dtype=float),
+        )
+    )
+    iota_sort_order = np.argsort(s_iota)
     results.iota = InterpolatedUnivariateSpline(
-        s_half_grid, nc_obj.variables["iotas"][1:]
+        s_iota[iota_sort_order], iota[iota_sort_order]
     )
     results.d_iota_d_s = results.iota.derivative()
 
@@ -1084,7 +1115,7 @@ def vmec_fieldlines(
         "grad_y",
         "grad_x",
         "zeta_center",
-        "nfp"
+        "nfp",
     ]
 
     for v in variables:
