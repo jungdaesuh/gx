@@ -548,7 +548,6 @@ def vmec_fieldlines(
     edge_toroidal_flux_over_2pi = -vs.phiedge / (2 * np.pi)
     toroidal_flux_sign = np.sign(edge_toroidal_flux_over_2pi)
     B_reference = 2 * abs(edge_toroidal_flux_over_2pi) / (L_reference * L_reference)
-    dpsidrho = 2 * sqrt_s * edge_toroidal_flux_over_2pi
 
     xm_b = vs.xm_b
     xn_b = vs.xn_b
@@ -1048,7 +1047,6 @@ def vmec_fieldlines(
         / (L_reference * L_reference * B_reference * B_reference * s[:, None, None])
     )
 
-
     gbdrift0 = (
         -1.0
         * B_cross_kappa_dot_grad_psi_b
@@ -1163,7 +1161,6 @@ gds21 = geo_coeffs.gds21[0][0]
 gds22 = geo_coeffs.gds22[0][0]
 R = geo_coeffs.R_b[0][0]
 Z = geo_coeffs.Z_b[0][0]
-theta_PEST_test = geo_coeffs.theta_PEST[0][0]
 grho = geo_coeffs.grho[0][0]
 alpha = geo_coeffs.alpha
 zeta_center = geo_coeffs.zeta_center
