@@ -1,0 +1,44 @@
+# Host: Plasma Simulator (gen7) Sousei Subsystem B at QST/NIFS
+#       NEC LX 401Bax-3GA
+#       AMD Instinct MI300A 4 sockets
+#       CPU: 24 cores 3.7GHz, GPU: 14,592procs 2.1GHz, 512GiB
+#
+# modules:
+# rocm/6.3.3
+# openmpi/5.0.7/rocm6.3.3
+# netcdf-c/4.9.3/gcc11.5.0-parallel
+#
+
+# netcdf
+NETCDF_ROOT = /system/apps/rhel9/library/netcdf-c-parallel/4.9.3/gcc11.5.0
+NETCDF_LIB = -L${NETCDF_ROOT}/lib -lnetcdf
+
+# mpi
+MPI_LIB = -lmpi
+
+# gsl
+GSL_ROOT = /usr
+GSL_INC = -I ${GSL_ROOT}/include
+GSL_LIB = -L ${GSL_ROOT}/lib -lgsl -lgslcblas
+
+CUDA_INC = -I${HIP_PATH}/include
+CUDA_LIB = -L${HIP_PATH}/lib -lamdhip64 -lhiptensor -lhipfft -lhipblas -lhipsolver -lrccl
+
+OMPI_CC = hipcc
+
+CXX = amdclang++
+NVCC = hipcc
+CFLAGS += -D__HIP_PLATFORM_AMD__
+NVCCFLAGS = -fgpu-rdc # mandatory
+NVCCFLAGS += -fPIC --offload-arch=gfx942 -ffast-math
+#NVCCFLAGS += --driver-mode=g++
+LDFLAGS = --hip-link -fgpu-rdc # mandatory
+LDFLAGS += --offload-arch=gfx942 # segfault without this
+#LDFLAGS += --driver-mode=g++
+
+ifeq ($(debug),on)
+	NVCCFLAGS += -g -G
+#	NVCCFLAGS += -ggdb -O0
+else
+	NVCCFLAGS += -O3
+endif
