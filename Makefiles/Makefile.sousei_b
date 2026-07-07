@@ -10,8 +10,7 @@
 #
 
 # netcdf
-NETCDF_ROOT = /system/apps/rhel9/library/netcdf-c-parallel/4.9.3/gcc11.5.0
-NETCDF_LIB = -L${NETCDF_ROOT}/lib -lnetcdf
+NETCDF_LIB = -lnetcdf
 
 # mpi
 MPI_LIB = -lmpi
