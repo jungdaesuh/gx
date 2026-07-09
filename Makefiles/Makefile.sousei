@@ -1,0 +1,8 @@
+# Host: Plasma Simulator (gen7) Sousei at QST/NIFS
+#  Subsystem A & C: Intel CPU
+#  Subsystem B: AMD APU
+ifndef GK_PROJECT
+  include Makefiles/Makefile.sousei_b
+else
+  include Makefile.sousei_ac
+endif
