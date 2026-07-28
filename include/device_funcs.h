@@ -32,12 +32,27 @@ __host__ __device__ cuComplex operator-(cuComplex f);
 
 __host__ __device__ cuComplex operator*(float scaler, cuComplex f) ;
 __host__ __device__ cuComplex operator*(cuComplex f, float scaler); 
+__host__ __device__ cuComplex operator*(double scaler, cuComplex f);
+__host__ __device__ cuComplex operator*(cuComplex f, double scaler);
+__host__ __device__ cuComplex operator*(int scaler, cuComplex f);
+__host__ __device__ cuComplex operator*(cuComplex f, int scaler);
+__host__ __device__ cuDoubleComplex operator*(float scaler, cuDoubleComplex f);
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, float scaler);
+__host__ __device__ cuDoubleComplex operator*(double scaler, cuDoubleComplex f);
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, double scaler);
+__host__ __device__ cuDoubleComplex operator*(int scaler, cuDoubleComplex f);
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, int scaler);
 #ifndef __HIPCC__
 __host__ __device__ cuComplex operator*(cuComplex f, cuComplex g);
 __host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, cuDoubleComplex g);
 #endif
 
 __host__ __device__ cuComplex operator/(cuComplex f, float scaler);
+__host__ __device__ cuComplex operator/(cuComplex f, double scaler);
+__host__ __device__ cuComplex operator/(cuComplex f, int scaler);
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, float scaler);
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, double scaler);
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, int scaler);
 #ifndef __HIPCC__
 __host__ __device__ cuComplex operator/(cuComplex f, cuComplex g) ;
 __host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, cuDoubleComplex g) ;

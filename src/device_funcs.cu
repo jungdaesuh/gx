@@ -268,6 +268,56 @@ __host__ __device__ cuComplex operator*(cuComplex f, float scale)
   return result;
 }
 
+__host__ __device__ cuComplex operator*(double scale, cuComplex f)
+{
+  return make_cuComplex(scale*f.x, scale*f.y);
+}
+
+__host__ __device__ cuComplex operator*(cuComplex f, double scale)
+{
+  return scale*f;
+}
+
+__host__ __device__ cuComplex operator*(int scale, cuComplex f)
+{
+  return make_cuComplex(scale*f.x, scale*f.y);
+}
+
+__host__ __device__ cuComplex operator*(cuComplex f, int scale)
+{
+  return scale*f;
+}
+
+__host__ __device__ cuDoubleComplex operator*(float scale, cuDoubleComplex f)
+{
+  return make_cuDoubleComplex(scale*f.x, scale*f.y);
+}
+
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, float scale)
+{
+  return scale*f;
+}
+
+__host__ __device__ cuDoubleComplex operator*(double scale, cuDoubleComplex f)
+{
+  return make_cuDoubleComplex(scale*f.x, scale*f.y);
+}
+
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, double scale)
+{
+  return scale*f;
+}
+
+__host__ __device__ cuDoubleComplex operator*(int scale, cuDoubleComplex f)
+{
+  return make_cuDoubleComplex(scale*f.x, scale*f.y);
+}
+
+__host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, int scale)
+{
+  return scale*f;
+}
+
 #ifndef __HIPCC__
 __host__ __device__ cuComplex operator*(cuComplex f, cuComplex g) { return cuCmulf(f,g); }
 __host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, cuDoubleComplex g) { return cuCmul(f,g); }
@@ -279,6 +329,31 @@ __host__ __device__ cuComplex operator/(cuComplex f, float scale)
   result.x = f.x / scale;
   result.y = f.y / scale;
   return result;
+}
+
+__host__ __device__ cuComplex operator/(cuComplex f, double scale)
+{
+  return make_cuComplex(f.x/scale, f.y/scale);
+}
+
+__host__ __device__ cuComplex operator/(cuComplex f, int scale)
+{
+  return make_cuComplex(f.x/scale, f.y/scale);
+}
+
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, float scale)
+{
+  return make_cuDoubleComplex(f.x/scale, f.y/scale);
+}
+
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, double scale)
+{
+  return make_cuDoubleComplex(f.x/scale, f.y/scale);
+}
+
+__host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, int scale)
+{
+  return make_cuDoubleComplex(f.x/scale, f.y/scale);
 }
 
 #ifndef __HIPCC__
