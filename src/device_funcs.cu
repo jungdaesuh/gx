@@ -268,8 +268,10 @@ __host__ __device__ cuComplex operator*(cuComplex f, float scale)
   return result;
 }
 
+#ifndef __HIPCC__
 __host__ __device__ cuComplex operator*(cuComplex f, cuComplex g) { return cuCmulf(f,g); }
 __host__ __device__ cuDoubleComplex operator*(cuDoubleComplex f, cuDoubleComplex g) { return cuCmul(f,g); }
+#endif
 
 __host__ __device__ cuComplex operator/(cuComplex f, float scale)
 {
@@ -279,8 +281,10 @@ __host__ __device__ cuComplex operator/(cuComplex f, float scale)
   return result;
 }
 
+#ifndef __HIPCC__
 __host__ __device__ cuComplex operator/(cuComplex f, cuComplex g) { return cuCdivf(f,g); }
 __host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, cuDoubleComplex g) { return cuCdiv(f,g); }
+#endif
 
 __device__ int get_ikx(int idx) {
   if (idx < nx/2+1)

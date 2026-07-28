@@ -1,3 +1,5 @@
+#pragma once
+
 #include <hip/hip_complex.h>
 #include <hipblas/hipblas.h>
 #include <hip/hip_runtime.h>
@@ -6,8 +8,46 @@
 #include <hipsolver/hipsolver.h>
 #include <rccl/rccl.h>
 #include <hiptensor/hiptensor.hpp>
+#include <hiptensor/hiptensor-version.hpp>
 #include <hiptensor/hiptensor_types.hpp>
 #include <hipcub/hipcub.hpp>
+
+// ROCm 7 defines component-wise vector multiplication and division for
+// hipComplex. GX uses these operators as complex arithmetic, matching CUDA's
+// cuComplex helpers, so specialize the compound operations used by ROCm's
+// generated binary operators.
+template <>
+__host__ __device__ inline HIP_vector_type<float, 2>&
+HIP_vector_type<float, 2>::operator*=(const HIP_vector_type<float, 2>& rhs) noexcept
+{
+  *this = hipCmulf(*this, rhs);
+  return *this;
+}
+
+template <>
+__host__ __device__ inline HIP_vector_type<double, 2>&
+HIP_vector_type<double, 2>::operator*=(const HIP_vector_type<double, 2>& rhs) noexcept
+{
+  *this = hipCmul(*this, rhs);
+  return *this;
+}
+
+template <>
+__host__ __device__ inline HIP_vector_type<float, 2>&
+HIP_vector_type<float, 2>::operator/=(const HIP_vector_type<float, 2>& rhs) noexcept
+{
+  *this = hipCdivf(*this, rhs);
+  return *this;
+}
+
+template <>
+__host__ __device__ inline HIP_vector_type<double, 2>&
+HIP_vector_type<double, 2>::operator/=(const HIP_vector_type<double, 2>& rhs) noexcept
+{
+  *this = hipCdiv(*this, rhs);
+  return *this;
+}
+
 #define  CUBLAS_OP_N  HIPBLAS_OP_N
 #define  CUBLAS_STATUS_ALLOC_FAILED  HIPBLAS_STATUS_ALLOC_FAILED
 #define  CUBLAS_STATUS_ARCH_MISMATCH  HIPBLAS_STATUS_ARCH_MISMATCH
@@ -185,6 +225,7 @@
 #define  GPU_SYMBOL(X) HIP_SYMBOL(X)
 #define  cutensorCreate hiptensorCreate
 #define  cutensorInitTensorDescriptor hiptensorInitTensorDescriptor
+#define  cutensorCreateTensorDescriptor hiptensorCreateTensorDescriptor
 #define  cutensorCreatePlanPreference hiptensorCreatePlanPreference
 #define  CUTENSOR_ALGO_DEFAULT HIPTENSOR_ALGO_DEFAULT
 #define  CUTENSOR_JIT_MODE_DEFAULT HIPTENSOR_JIT_MODE_DEFAULT 
@@ -198,6 +239,7 @@
 #define  cutensorEstimateWorkspaceSize hiptensorEstimateWorkspaceSize
 #define  cutensorCreatePlan hiptensorCreatePlan
 #define  cutensorReduction hiptensorReduction
+#define  cutensorReduce hiptensorReduce
 #define  CUTENSOR_WORKSPACE_DEFAULT HIPTENSOR_WORKSPACE_DEFAULT
 #define  CUTENSOR_STATUS_SUCCESS HIPTENSOR_STATUS_SUCCESS
 #define  cutensorGetErrorString hiptensorGetErrorString
@@ -216,4 +258,13 @@
 #define  cutensorContractionDescriptor_t hiptensorContractionDescriptor_t
 #define  cutensorContractionPlan_t hiptensorContractionPlan_t
 #define  cutensorReductionGetWorkspaceSize hiptensorReductionGetWorkspaceSize 
+#if HIPTENSOR_MAJOR_VERSION >= 2
+#define  CUTENSOR_VERSION 20000
+#define  cutensorComputeDescriptor_t hiptensorComputeDescriptor_t
+#define  cutensorDataType_t hiptensorDataType_t
+#define  CUTENSOR_COMPUTE_DESC_32F HIPTENSOR_COMPUTE_DESC_32F
+#define  CUTENSOR_COMPUTE_DESC_64F HIPTENSOR_COMPUTE_DESC_64F
+#define  CUTENSOR_R_32F HIPTENSOR_R_32F
+#define  CUTENSOR_R_64F HIPTENSOR_R_64F
+#endif
 #define  cub hipcub
