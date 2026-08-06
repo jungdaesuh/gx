@@ -151,7 +151,14 @@ void run_gx(Parameters *pars, Grids *grids, Geometry *geo)
 
   cudaEventRecord(stop,0);    cudaEventSynchronize(stop);    cudaEventElapsedTime(&timer,start,stop);
 
-  printf("Total runtime = %f min (%f s / timestep)\n", timer/1000./60., timer/1000./counter);
+  // counter is zero if the loop never ran (nstep = 0, or t_max already reached), in which case
+  // there is no per-timestep figure to report -- dividing by it would print inf.
+  if(pars->iproc==0) {
+    if (counter > 0)
+      printf("Total runtime = %f min (%f s / timestep)\n", timer/1000./60., timer/1000./counter);
+    else
+      printf("Total runtime = %f min (no timesteps taken)\n", timer/1000./60.);
+  }
 
   diagnostics->finish(G, fields, time);
 
