@@ -62,32 +62,10 @@
  iphi00 = 2
  tau_fac = 1.0
 
-[Wspectra]
- species          = true
- hermite          = true
- laguerre         = true
- hermite_laguerre = true
- kx               = true
- ky               = true
- kz               = true
- kxky             = true
- kperp            = false
- z                = true
-
-[Pspectra]
- species          = true
- kx               = true
- ky               = true
- kz               = true
- kxky             = true
- kperp            = false
- z                = true
-
 [Forcing]
  forcing_amp = 0.0
  forcing_init = false
  
-
 # it is okay to have extra species data here; only the first nspecies elements of each item are used
 
 [species]
@@ -99,4 +77,3 @@
  fprim = [ 0.0,       0.0     ]
  vnewk = [ 0.0,       0.0     ]
  type  = [ "ion",  "electron" ]
-

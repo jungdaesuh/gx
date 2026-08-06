@@ -39,56 +39,7 @@ enum class inits {density, upar, tpar, tperp, qpar, qperp, all};
 enum class stirs {density, upar, tpar, tperp, qpar, qperp, ppar, pperp};
 enum class Tmethod {sspx2, sspx3, rk3, rk4, k10};
 enum class Closure {none, beer42, smithperp, smithpar};
-enum WSpectra {WSPECTRA_species,
-	       WSPECTRA_kx,
-	       WSPECTRA_ky,
-	       WSPECTRA_z,
-	       WSPECTRA_l,
-	       WSPECTRA_m,
-	       WSPECTRA_lm,
-	       WSPECTRA_kperp,
-	       WSPECTRA_kxky,
-	       WSPECTRA_kz};
-
-enum PSpectra {PSPECTRA_species,
-	       PSPECTRA_kx,
-	       PSPECTRA_ky,
-	       PSPECTRA_kperp,
-	       PSPECTRA_kxky,
-	       PSPECTRA_z,	       
-	       PSPECTRA_kz};
 	       
-enum ASpectra {ASPECTRA_species,
-	       ASPECTRA_kx,
-	       ASPECTRA_ky,
-	       ASPECTRA_kperp,
-	       ASPECTRA_kxky,
-	       ASPECTRA_z,	       
-	       ASPECTRA_kz};
-
-enum QSpectra {QSPECTRA_species,
-	       QSPECTRA_kx,
-	       QSPECTRA_ky,
-	       QSPECTRA_kperp,
-	       QSPECTRA_kxky,
-	       QSPECTRA_z,	       
-	       QSPECTRA_kz};
-
-enum GamSpectra {GamSPECTRA_species,
-	       GamSPECTRA_kx,
-	       GamSPECTRA_ky,
-	       GamSPECTRA_kperp,
-	       GamSPECTRA_kxky,
-	       GamSPECTRA_z,	       
-	       GamSPECTRA_kz};
-
-enum Phi2Spectra {PHI2SPECTRA_t,
-	       PHI2SPECTRA_kx,
-	       PHI2SPECTRA_ky,
-	       PHI2SPECTRA_kperp,
-	       PHI2SPECTRA_kxky,
-	       PHI2SPECTRA_z,	       
-	       PHI2SPECTRA_kz};
 	       
 #define PHIEXT 1
 
@@ -105,12 +56,6 @@ class Parameters {
   
   int iproc, nprocs;
   MPI_Comm mpcom;
-  const int nw_spectra = 10; // should match # of elements in WSpectra
-  const int np_spectra = 7;  // should match # of elements in PSpectra
-  const int na_spectra = 7;  // should match # of elements in ASpectra
-  const int nq_spectra = 7;  // should match # of elements in PSpectra
-  const int ngam_spectra = 7;  // should match # of elements in PSpectra
-  const int nphi2_spectra = 7;  // should match # of elements in PSpectra
   void get_nml_vars(char* file);
   void store_ncdf(int ncid, NcDims *nc_dims);
 
@@ -216,7 +161,7 @@ class Parameters {
   bool diagnosing_kzspec;
   bool write_l_spectrum, write_h_spectrum, write_lh_spectrum, repeat;
   bool new_style;
-  bool write_phi_kpar, write_moms, write_fluxes, diagnosing_spectra;
+  bool write_phi_kpar, write_moms, write_fluxes;
   bool write_free_energy, diagnosing_moments, diagnosing_pzt;
   bool qprp0_switch;
   bool no_zderiv;
@@ -239,20 +184,7 @@ class Parameters {
   int specs[1]; // dims for netcdf species variable arrays
   size_t is_start[1], is_count[1]; 
 
-  bool energy_spectra;
 
-  int aspecdim[1]; // dimension of control structure for spectral plots (adiabatic species)
-  int pspecdim[1]; // dimension of control structure for spectral plots (1-Gamma_0) Phi**2
-  int wspecdim[1]; // dimension of control structure for spectral plots G**2
-  int qspecdim[1]; // dimension of control structure for spectral plots Q
-  int gamspecdim[1]; // dimension of control structure for spectral plots Gamma
-  int phi2specdim[1]; // dimension of control structure for spectral plots phi**2
-  size_t aspectra_start[1], aspectra_count[1]; 
-  size_t pspectra_start[1], pspectra_count[1]; 
-  size_t wspectra_start[1], wspectra_count[1]; 
-  size_t qspectra_start[1], qspectra_count[1]; 
-  size_t gamspectra_start[1], gamspectra_count[1]; 
-  size_t phi2spectra_start[1], phi2spectra_count[1]; 
   
   std::string Btype;
   std::string code_info;
@@ -266,12 +198,6 @@ class Parameters {
   std::string geofilename;
   std::string eqfile;
 
-  std::vector<int> wspectra;
-  std::vector<int> pspectra;
-  std::vector<int> aspectra;
-  std::vector<int> qspectra;
-  std::vector<int> gamspectra;
-  std::vector<int> phi2spectra;
   
   cudaDeviceProp prop;
   int maxThreadsPerBlock;
@@ -285,12 +211,6 @@ class Parameters {
   void  put_real (int ncid, const char varname[], float val); 
   void  putbool  (int ncid, const char varname[], bool val);
   void  putspec (int ncid, int m, specie* val);
-  void  put_wspectra (int ncid, std::vector<int> s);
-  void  put_pspectra (int ncid, std::vector<int> s);
-  void  put_aspectra (int ncid, std::vector<int> s);
-  void  put_qspectra (int ncid, std::vector<int> s);
-  void  put_gamspectra (int ncid, std::vector<int> s);
-  void  put_phi2spectra (int ncid, std::vector<int> s);
   bool initialized;
 };
 
