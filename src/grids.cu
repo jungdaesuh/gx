@@ -66,7 +66,6 @@ Grids::Grids(Parameters* pars) :
       m_lo = 0;
       m_up = Nm;
 
-      //printf("GPU %d: is_lo = %d, is_up = %d, m_lo = %d, m_up = %d\n", iproc, is_lo, is_up, m_lo, m_up);
     } else { // decomp in species and hermite
       assert((nprocs%Nspecies == 0) && "nprocs > nspecies, so nprocs must be an integer multiple of nspecies\n");
       nprocs_s = Nspecies;
@@ -147,14 +146,12 @@ Grids::Grids(Parameters* pars) :
 
   checkCuda(cudaGetLastError());
 
-  //  printf("In grids constructor. Nyc = %i \n",Nyc);
   
   setdev_constants(Nx, Ny, Nyc, Nz, Nspecies, Nm, Nl, Nj, pars_->Zp, pars_->ikx_fixed, pars_->iky_fixed, is_lo, is_up, m_lo, m_up, m_ghost, pars_->nm_in);
 
   checkCuda(cudaDeviceSynchronize());
 
   DEBUGPRINT("Initializing NCCL comms...\n");
-  //cudaStreamCreate(&ncclStream);
   if(iproc == 0) ncclGetUniqueId(&ncclId);
   if(nprocs > 1) {
     MPI_Bcast((void *)&ncclId, sizeof(ncclId), MPI_BYTE, 0, MPI_COMM_WORLD);
@@ -254,12 +251,9 @@ void Grids::init_ks_and_coords()
     dB = dim3(nt1, nt2, nt3);
     dG = dim3(nb1, nb2, nb3);
     init_kxstar_kxbar_phasefac <<< dG, dB >>> (kxstar, kxbar_ikx_new, kxbar_ikx_old, phasefac_exb, phasefacminus_exb, kx); // Do we really need th0 here? // JFP
-    //CP_TO_CPU (theta0_h, th0, sizeof(float)*Nx);
   }
   
   if (Nx<4) {
-    //    printf("Nx, Nakx = %d, %d \n",Nx, Nakx);
-    //    printf("kx_h = %f \n",kx_h[0]);
     for (int i=0; i<Nx; i++) kx_outh[i] = kx_h[i];
   } else {    
     kx_outh[Nakx/2] = 0.;

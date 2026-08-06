@@ -144,6 +144,27 @@ class SpectraCalc_kxkyzt : public SpectraCalc {
 };
 
 
+// For each kx, z, l and m, sum the moments of G**2 + Phi**2 (1-Gamma_0) with weights:
+//
+// The full sum is
+//
+// sum_s sum_l,m sum_ky sum_kx sum_z J(z) == SUM
+//
+// and there is a denominator for the z-integration, to normalize out the volume,
+// SUM => SUM / sum J(z)
+//
+// W = SUM n_s tau_s G**2 / 2 + SUM n_s Z_s**2 / (2 tau_s) (1 - Gamma_0) Phi**2
+//
+// Since we store only half of the spatial Fourier coefficients for all but the
+// ky = 0 modes
+//
+// (for which we have the full set of kx modes, kx > 0 and kx < 0, and everything is zero for kx = ky = 0)
+//
+// we multiply all the ky != 0 modes by a factor of two. This is easiest to see in device_functions/vol_summand.
+//
+// To make later manipulations easiest, all partial summations will be carried such that a simple sum of
+// whatever is leftover will give W.
+
 // class that packages and initialzes all spectra calculator classes
 class AllSpectraCalcs {
  public:

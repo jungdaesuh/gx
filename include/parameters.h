@@ -272,21 +272,14 @@ class Parameters {
   std::string code_info;
   
   std::string restart_from_file, restart_to_file;
-  //  char restart_from_file[512];
-  //  char restart_to_file[512];
   
   std::string scheme, forcing_type, init_field, stir_field;
   std::string closure_model, boundary, source;
-  
-  // char scheme[32], forcing_type[32], init_field[32], stir_field[32];
-  // char boundary[32], closure_model[32], source[32];
 
   std::string geo_option;
   std::string geofilename;
   std::string eqfile;
-  //  char geofilename[512];
 
-  //  int *spectra = (int*) malloc (sizeof(int)*13);
   std::vector<int> wspectra;
   std::vector<int> pspectra;
   std::vector<int> aspectra;

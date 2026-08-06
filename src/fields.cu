@@ -102,20 +102,6 @@ Fields::Fields(Parameters* pars, Grids* grids) :
     
     delete grad_perp;
 
-    //debug part
-
-    //grad_perp->qvar(apar_ext_realspace, grids_->NxNyNz); 
-    //CP_TO_CPU(apar_ext_h, apar_ext, sizeof(cuComplex) * grids_->NxNycNz);
-  //  for(int idz = 0; idz < grids_->Nz; idz++){
-  //    for(int idx = 0; idx < grids_->Nx; idx++){
-  //      for(int idy = 0; idy < grids_->Nyc; idy++){
-  //         unsigned int idxyz = idy + grids_->Nyc *(idx + grids_->Nx*idz); 
-  //         printf("idxyz%d:",idxyz);
-  //         printf("%f\n",apar_ext_h[idxyz].x);
-  //      }
-  //    }
-  //  }
-    //grad_perp->qvar(apar_ext, grids_->NxNycNz); 
   }
   if (pars_->periodic_equilibrium && !pars_->restart) {
     int nBatch = grids_->Nz;
@@ -140,20 +126,6 @@ Fields::Fields(Parameters* pars, Grids* grids) :
 
     delete grad_perp;
 
-    //debug part
-
-    //grad_perp->qvar(apar_ext_realspace, grids_->NxNyNz); 
-    //CP_TO_CPU(apar_ext_h, apar_ext, sizeof(cuComplex) * grids_->NxNycNz);
-  //  for(int idz = 0; idz < grids_->Nz; idz++){
-  //    for(int idx = 0; idx < grids_->Nx; idx++){
-  //      for(int idy = 0; idy < grids_->Nyc; idy++){
-  //         unsigned int idxyz = idy + grids_->Nyc *(idx + grids_->Nx*idz); 
-  //         printf("idxyz%d:",idxyz);
-  //         printf("%f\n",apar_ext_h[idxyz].x);
-  //      }
-  //    }
-  //  }
-    //grad_perp->qvar(apar_ext, grids_->NxNycNz); 
   }
   if (pars_->island_coalesce && !pars_->restart) {
     int nBatch = grids_->Nz;

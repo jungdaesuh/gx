@@ -450,7 +450,6 @@ __global__ void equilibrium_current_krehm (cuComplex *G1, float* kx, float* ky, 
     unsigned int idxyz = get_idxyz(idx, idy, idz);
 
     float kperp2 = kx[idx]*kx[idx] + ky[idy]*ky[idy];
-    //printf("apar_ext[%d]: %f + %fi\n", idxyz, apar_ext[idxyz].x, apar_ext[idxyz].y);
     G1[idxyz] = G1[idxyz] - (1. + d_e*d_e*kperp2)*apar_ext[idxyz]/(rho_s*d_e);
   }
 }
@@ -781,10 +780,8 @@ __global__ void eig_residual(double* y, double* A, double* x, double* R,
   if (n < N) {
     y[n] = A[K*n] * x[K*n];
     for (int k=1; k<K; k++) y[n] += A[k + K*n] * x[k + K*n];
-    //    printf("eval = %e \n", eval);
     double res = eval*R[n] - y[n];
     r2[n] = pow(res,2);
-    //    printf("r2[%d] = %e \n",n,r2[n]);
   }
 }
 
@@ -1402,7 +1399,6 @@ __device__ cuComplex i_kxstar(void *dataIn, size_t offset, void *kxstarData, voi
   unsigned int idy = offset % nyc;
   unsigned int idxy = idy+nyc*idx;
   //unsigned int idxy = offset % (nyc*nx);
-  //printf("nx = %d, nyc = %d, kxstar[idy = %d,idx =  %d] = %f \n", nx, nyc, idy, idx, kxstar[idxy]);
   cuComplex Ikxstar = make_cuComplex(0., kxstar[idxy]);
   return Ikxstar*((cuComplex*)dataIn)[offset];
 }
@@ -1920,11 +1916,9 @@ __global__ void Wphi_summand(float* p2, const cuComplex* phi, const float* volJa
       if (idy==0) fac = 1.0;
 
       float b_s = kperp2[idxyz]*rho2_s;
+      // g0(b) is the exact Gamma_0. Using sum_l Jflr(l,b)^2 instead would make this term
+      // consistent with the truncated Laguerre basis; the two differ at finite nl.
       float g0_s = g0(b_s);
-      //for (int l=0; l < nl; l++) {
-      //  const float Jl = Jflr(l, b_s);
-      //  g0_s += Jl*Jl;
-      //}
 
       cuComplex tmp = cuConjf( phi[idxyz] ) * ( 1.0 - g0_s ) * phi[idxyz] * fac * volJac[idz];
       p2[idxyz] = 0.5 * tmp.x;
@@ -2777,24 +2771,8 @@ __global__ void qneutAdiab(cuComplex* Phi, const cuComplex* nbar,
 
 __device__ void i_kzLinked(void *dataOut, size_t offset, cufftComplex element, void *kzData, void *sharedPtr)
 {
-  /*
-  // Could do it this way: 
-  // Passed: nLinks; we know nz
-  unsigned int nzL = nz*nLinks;
-  unsigned int idz = offset % (nzL);
-  float zpnLinv = (float) 1./(zp*nLinks);
-  float kz;
-  int j = idz % (nzL/2+1)     
-  if (idz < nzL/2+1) {
-    kz = (float) idz * zpnLinv;
-  } else {
-    int idzs = idz-nzL;
-    kz = (float) idzs * zpnLinv;
-  }
-  cuComplex Ikz = make_cuComplex(0., kz);
-  float normalization = (float) 1./nzL;
-  ((cuComplex*)dataOut)[offset] = Ikz*element*normalization;
-  */
+  // kz could instead be derived from offset/nLinks arithmetic rather than indexing kzData,
+  // but that would require passing nLinks into the callback.
   float *kz = (float*) kzData;
   int nLinks = (int) lrintf(1./(zp*kz[1]));
   unsigned int idz = offset % (nz*nLinks);
@@ -2819,24 +2797,8 @@ __device__ void i_kzLinkedNTFT(void *dataOut, size_t offset, cufftComplex elemen
 
 __device__ void mkz2_Linked(void *dataOut, size_t offset, cufftComplex element, void *kzData, void *sharedPtr)
 {
-  /*
-  // Could do it this way: 
-  // Passed: nLinks; we know nz
-  unsigned int nzL = nz*nLinks;
-  unsigned int idz = offset % (nzL);
-  float zpnLinv = (float) 1./(zp*nLinks);
-  float kz;
-  int j = idz % (nzL/2+1)     
-  if (idz < nzL/2+1) {
-    kz = (float) idz * zpnLinv;
-  } else {
-    int idzs = idz-nzL;
-    kz = (float) idzs * zpnLinv;
-  }
-  cuComplex Ikz = make_cuComplex(0., kz);
-  float normalization = (float) 1./nzL;
-  ((cuComplex*)dataOut)[offset] = Ikz*element*normalization;
-  */
+  // kz could instead be derived from offset/nLinks arithmetic rather than indexing kzData,
+  // but that would require passing nLinks into the callback.
   float *kz = (float*) kzData;
   int nLinks = (int) lrintf(1./(zp*kz[1]));
   unsigned int idz = offset % (nz*nLinks);
@@ -2941,7 +2903,6 @@ __global__ void init_kzLinked(float* kz, int nLinks, bool dealias_kz)
     } else {
       kz[i] = (float) (i-nzL)/(zp*nLinks);
     }
-    //printf("%d %f\n", nLinks, kz[i]);
     if (dealias_kz) {
       if (i > (nzL-1)/3 && i < nzL - (nzL-1)/3) {kz[i] = 0.0;}
     }
@@ -3302,14 +3263,15 @@ __global__ void __launch_bounds__(512) dampEnds_linked(cuComplex* G,
     }
 
     float nu = 0.;
-    // width = width of damping region in number of grid points 
-    // set damping region width to 1/8 of extended domain (on either side)
-    // widthfac = 1./8.;
+    // width = width of damping region in number of grid points.
+    // The original default was to damp over 1/8 of the extended domain on either side;
+    // it is now set from the damp_ends_widthfrac input.
     unsigned int idzp = idz + nz*p_map[idy + naky*idakx];
     unsigned int nLinks = nLinks_map[idy + naky*idakx];
 
-    int width = (int) nz*nLinks*widthfrac;  
-    // float L = (float) 2*M_PI*zp*nLinks*widthfrac;
+    int width = (int) nz*nLinks*widthfrac;
+    // Historically the damping rate was a physical rate 5*vmax/L with
+    // L = 2*pi*zp*nLinks*widthfrac; it is now set from damp_ends_amp/dt instead.
     float vmax = sqrtf(2*nm_glob); // estimate of max vpar on grid
     if (idzp <= width ) {
       float x = ((float) idzp)/width;
@@ -3333,55 +3295,11 @@ __global__ void __launch_bounds__(512) dampEnds_linked(cuComplex* G,
     if(idm+m_lo==1) H_ = H_ - zt_*vt_*Jflr(idl, b_)*apar[idxyz]; 
     GRhs[globalIdx] = GRhs[globalIdx] - nu*amp*H_;
   }
-
-////////////////
-
-//  unsigned int idz = get_id1();
-//  unsigned int idk = get_id2();
-//  unsigned int idlm = get_id3();
-//
-//  if (idz < nz && idk < nLinks*nChains && idlm < nMoms) {
-//    unsigned int idzp = idz + nz*(idk % nLinks);
-//    unsigned int globalIdx = iky[idk] + nyc*(ikx[idk] + nx*(idz + nz*idlm));
-//    unsigned int idxyz = iky[idk] + nyc*(ikx[idk] + nx*idz);
-//    // unsigned int idxyz = get_idxyz(ikx[idk], iky[idk], idz);
-//    // Question: why are we using ikx and iky in the definition of idxyz? Surely this should be idx and idy?
-//    // Answer: in grad_parallel_linked, we use ky and kx to hold index values rather than k values. Confusing.
-//    
-//    float nu = 0.;
-//    // width = width of damping region in number of grid points 
-//    // set damping region width to 1/8 of extended domain (on either side)
-//    // widthfac = 1./8.;
-//    int width = (int) nz*nLinks*widthfrac;  
-//    // float L = (float) 2*M_PI*zp*nLinks*widthfrac;
-//    float vmax = sqrtf(2*nm_glob); // estimate of max vpar on grid
-//    if (idzp <= width ) {
-//      float x = ((float) idzp)/width;
-//      nu = 1 - 2*x*x/(1+x*x*x*x);
-//    } else if (idzp >= nz*nLinks-width) {
-//      float x = ((float) nz*nLinks-idzp)/width;
-//      nu = 1 - 2*x*x/(1+x*x*x*x);
-//    }
-//    // only damp ends of non-zonal (ky>0) modes, since ky=0 modes should be periodic
-//    if(iky[idk]>0) {
-//      unsigned int idl = idlm % nl;
-//      unsigned int idm = idlm / nl;
-//      const float kperp2_ = kperp2[idxyz];
-//      const float zt_ = sp.zt;
-//      const float vt_ = sp.vt;
-//      const float rho2_ = sp.rho2;
-//      const float b_ = kperp2_ * rho2_;
-//      // the quantity we want to damp is h = g' + phi*FM - vpar*Apar*FM, so we need to adjust m=0 and m=1 with fields
-//      cuComplex H_ = G[globalIdx];
-//      if(idm+m_lo==0) H_ = H_ + zt_*Jflr(idl, b_)*phi[idxyz] + JflrB(idl, b_)*bpar[idxyz];
-//      if(idm+m_lo==1) H_ = H_ - zt_*vt_*Jflr(idl, b_)*apar[idxyz]; 
-//      GRhs[globalIdx] = GRhs[globalIdx] - nu*amp*H_;
-//      //GRhs[globalIdx] = GRhs[globalIdx] - 5.0*nu*vmax/L*H_;
-//    }
-//  }
 }
 
-__global__ void dampEnds_linkedNTFT(cuComplex* G, 
+// NOTE: in the linked/NTFT chain arrays, ikxLinked/ikyLinked hold grid *indices*, not k values,
+// despite the names. (grad_parallel_linked reuses the kx/ky arrays to carry index values.)
+__global__ void dampEnds_linkedNTFT(cuComplex* G,
 				    cuComplex* phi, 
 				    cuComplex* apar, 
 				    cuComplex* bpar, 
@@ -4301,7 +4219,6 @@ __global__ void field_shift(cuComplex* field_new, const cuComplex* field_old, co
     int idxy  = idy + nyc * idx;
     //if field is sheared beyond resolution or mask, set incoming field to 0
     //if (idx == 0) {
-    //  printf("field_shift kxbar_ikx_new[idxy] is %d and kxbar_ikx_old[idxy] is %d idy is %d idx is %d \n", kxbar_ikx_new[idxy], kxbar_ikx_old[idxy], idy, idx);
     //  }
     if(abs(kxbar_ikx_new[idxy]) > nakx/2) {
       int sign_of_exb = ( g_exb > 0 ) ? 1 : -1;
@@ -4317,7 +4234,6 @@ __global__ void field_shift(cuComplex* field_new, const cuComplex* field_old, co
       int idxyz_new = get_idxyz(idx_new, idy, idz);
       field_new[idxyz_new] = field_old[idxyz_old];
       //if (idx == 0) {
-      //  printf("field shifting for the kx = 0 mode \n");
       //}
     }
   }
@@ -4337,7 +4253,6 @@ __global__ void g_shift(cuComplex* g_new, const cuComplex* g_old, const int* kxb
       unsigned int idz = idxz / nx;
       unsigned int idxy = idy + nyc*idx;
       //if (idx == 0) {
-      //  printf("g_shift kxbar_ikx_new[idxy] is %d and kxbar_ikx_old[idxy] is %d idy is %d idx is %d \n", kxbar_ikx_new[idxy], kxbar_ikx_old[idxy], idy, idx);
       //}
       //if g is sheared beyond resolution or mask, set incoming field to 0
       if(abs(kxbar_ikx_new[idxy]) > nakx/2) {
@@ -4355,7 +4270,6 @@ __global__ void g_shift(cuComplex* g_new, const cuComplex* g_old, const int* kxb
         g_new[ig_new] = g_old[ig_old];
 	// We seem to have an issue with the kx = 0 mode shifting one timestep too late?
 	//if (idx == 0) {
-	//  printf("g shifting for the kx = 0 mode \n");
 	//}
       }
     }

@@ -515,11 +515,8 @@ void Parameters::get_nml_vars(char* filename)
   if(geo_option=="s-alpha" || geo_option=="slab" || geo_option=="const-curv" || igeo==0) {
     shat        = toml::find_or <float> (tnml, "shat",     0.8 );
   } else {
-    // shat will be taken from geometry file; do nothing here
-    //shat        = toml::find <float> (tnml, "shat");
-    //printf("Using the value of shat that appears in the .in file. \n");
-    //printf("Be sure it is consistent with the value in the geometry file. \n");
-    //printf("Using shat = %f \n",shat);
+    // For file-based geometry, shat always comes from the geometry file; any "shat" in the
+    // input file is ignored.
   }
 
   RBzeta_override = toml::find_or<float>( tnml, "RBzeta", 0.0 ); // For explicitly setting I(psi) for flying-slab simulations
@@ -757,11 +754,7 @@ void Parameters::get_nml_vars(char* filename)
     nz_in = 2*ntgrid; // force even
   }
   
-  //Zp = 2*nperiod - 1; // BD This needs updating
-  
-  // BD  This is messy. Prefer to go back to original method
-  // before, jtwist_old assumed Zp=1
-  // now, redefining jtwist = jtwist_old*Zp
+  // BD  Note: jtwist is now defined as jtwist_old*Zp; the older convention assumed Zp = 1.
 
   closure_model_opt = Closure::none   ;
   if( closure_model == "beer4+2") {

@@ -24,13 +24,10 @@ Linear_GK::Linear_GK(Parameters* pars, Grids* grids, Geometry* geo) :
     DEBUGPRINT("Using local limit for grad parallel.\n");
     grad_par = new GradParallelLocal(grids_);
   }
-  /* the below is commented out because the GradParallelLinked implementation with nLinks = 1 is 
-     faster than GradParallelPeriodic, and gives same results. so when boundary_option_periodic is requested,
-      we set jtwist = 2*nx (in Parameters::set_jtwist_x0) to give nLinks = 1 for all modes and use GradParallelLinked. */
-  //else if(pars_->boundary_option_periodic && pars_->nx_in > 1) {
-  //  DEBUGPRINT("Using periodic for grad parallel.\n");
-  //  grad_par = new GradParallelPeriodic(grids_);
-  //}
+  /* There is deliberately no GradParallelPeriodic branch: the GradParallelLinked implementation
+     with nLinks = 1 is faster than GradParallelPeriodic and gives the same results. So when
+     boundary_option_periodic is requested, we set jtwist = 2*nx (in Parameters::set_jtwist_x0) to
+     give nLinks = 1 for all modes and use GradParallelLinked. */
   else if(pars_->nonTwist) {
     grad_par = new GradParallelNTFT(pars_, grids_);
   }
@@ -287,10 +284,8 @@ Linear_KREHM::Linear_KREHM(Parameters* pars, Grids* grids, Geometry* geo) :
     DEBUGPRINT("Using local limit for grad parallel.\n");
     grad_par = new GradParallelLocal(grids_);
   }
-  //else if(pars_->boundary_option_periodic) {
-  //  DEBUGPRINT("Using periodic for grad parallel.\n");
-  //  grad_par = new GradParallelPeriodic(grids_);
-  //}
+  // No GradParallelPeriodic branch here: see the note in Linear_GK's constructor above --
+  // boundary_option_periodic is served by GradParallelLinked with nLinks = 1.
   else {
     DEBUGPRINT("Using twist-and-shift for grad parallel.\n");
     grad_par = new GradParallelLinked(pars_, grids_);

@@ -322,7 +322,6 @@ S_alpha_geo::S_alpha_geo(Parameters *pars, Grids *grids)
   grho_h = (float*) malloc (size);
   jacobian_h = (float*) malloc (size);
 
-  // kperp2_h = (float*) malloc(sizeof(float)*grids->NxNycNz);
   
   cudaMalloc ((void**) &z, size);
   cudaMalloc ((void**) &bmag, size);
@@ -582,7 +581,6 @@ geo_nc::geo_nc(Parameters *pars, Grids *grids)
   if (retval = nc_inq_varid(ncgeo, "shat", &id))         ERR(retval);
   if (retval = nc_get_var  (ncgeo, id, &stmp))           ERR(retval);
   shat = pars->shat = (float) stmp;
-  //  printf("geometry: shat = %f \n",shat);
   
   if (retval = nc_inq_varid(ncgeo, "Rmaj", &id))
     if (retval = nc_inq_varid(ncgeo, "rmaj", &id))           ERR(retval);
@@ -742,7 +740,6 @@ Eik_geo::Eik_geo(Parameters *pars, Grids *grids)
   int ntgrid;
   int oldNz, oldnperiod;
   
-  //  rewind(geoFile);
   using namespace std;
   string datline;
   ifstream myfile (pars->geofilename.c_str());
@@ -1035,9 +1032,6 @@ void Geometry::calculate_bgrad(Grids* grids)
 
   delete grad_par;
 
-//  for(int i=0; i<grids->Nz; i++) {
-//    printf("bgrad_h[%d]: %.4e\n",i,bgrad_h[i]);
-//  }
   cudaDeviceSynchronize();
 }
 

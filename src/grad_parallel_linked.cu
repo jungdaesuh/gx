@@ -132,9 +132,7 @@ GradParallelLinked::GradParallelLinked(Parameters* pars, Grids* grids)
 
   stream = (cudaStream_t*) malloc(sizeof(cudaStream_t)*nClasses);
 
-  //  printf("nClasses = %d\n", nClasses);
   for(int c=0; c<nClasses; c++) {
-    //    printf("\tClass %d: nChains = %d, nLinks = %d\n", c, nChains[c], nLinks[c]);
 
     // allocate and copy into device memory
     int nLC = nLinks[c]*nChains[c];
@@ -173,10 +171,8 @@ GradParallelLinked::GradParallelLinked(Parameters* pars, Grids* grids)
     dB_all = dim3(nt1, nt2, nt3);
     dG_all = dim3(nb1, nb2, min(MAX_BLOCK_DIM_YZ, nb3));	 
     
-    //    dB[c] = dim3(32,4,4);
     //    dG[c] = dim3(1 + (grids_->Nz-1)/dB[c].x,
     //		 1 + (nLinks[c]*nChains[c]-1)/dB[c].y,
-    //		 1 + (grids_->Nmoms-1)/dB[c].z);
   }
 
   for(int c=0; c<nClasses; c++) {
@@ -533,7 +529,6 @@ int GradParallelLinked::get_nClasses(int *idxRight, int *idxLeft, int *linksR, i
 {  
   int idx0, idxL, idxR;
 
-  //  printf("naky, nakx, jshift0 = %d \t %d \t %d \n",naky, nakx, jshift0);
   
   for(int idx=0; idx<nakx; idx++) {
     for(int idy=0; idy<naky; idy++) {
@@ -573,20 +568,6 @@ int GradParallelLinked::get_nClasses(int *idxRight, int *idxLeft, int *linksR, i
     }
   }
 
-  /*
-  for(int idx=0; idx<nakx; idx++) {
-    for(int idy=0; idy<naky; idy++) {
-      printf("idxLeft[%d,%d]= %d  ", idy, idx, idxLeft[idy + naky*idx]);
-    }
-    printf("\n");
-  }
-  for(int idx=0; idx<nakx; idx++) {
-    for(int idy=0; idy<naky; idy++) {
-      printf("idxRight[%d,%d]= %d  ", idy, idx, idxRight[idy + naky*idx]);
-    }
-    printf("\n");
-  }
-  */
   
   for(int idx=0; idx<nakx; idx++) {
     for(int idy=0; idy<naky; idy++) {
@@ -616,20 +597,6 @@ int GradParallelLinked::get_nClasses(int *idxRight, int *idxLeft, int *linksR, i
     }
   }
 
-  /*
-  for(int idx=0; idx<nakx; idx++) {
-    for(int idy=0; idy<naky; idy++) {
-      printf("linksL[%d,%d]= %d  ", idy, idx, linksL[idy + naky*idx]);
-    }
-    printf("\n");
-  }
-  for(int idx=0; idx<nakx; idx++) {
-    for(int idy=0; idy<naky; idy++) {
-      printf("linksR[%d,%d]= %d  ", idy, idx, linksR[idy + naky*idx]);
-    }
-    printf("\n");
-  } 
-  */
   
   //now we set up class array
   //nClasses = # of classes  
@@ -644,14 +611,6 @@ int GradParallelLinked::get_nClasses(int *idxRight, int *idxLeft, int *linksR, i
     }
   }
 
-  /*
-  for(int idx=0; idx<nakx; idx++) {
-    for(int idy=0; idy<naky; idy++) {
-      printf("nLinks[%d,%d]= %d  ", idy, idx, n_k[idy+naky*idx]);
-    }
-    printf("\n");
-  }
-  */
   
   //count how many unique values of n_k there are, which is the number of classes
   
@@ -764,7 +723,6 @@ void GradParallelLinked::kFill(int nClasses, int *nChains, int *nLinks,
         if(ikx >= (nakx+1)/2) ikx -= nshift;
         c_map[iky + ikx*naky] = c;
         n_map[iky + ikx*naky] = n;
-        //p_map[ky + kx*naky] = p;
         nLinks_map[iky + ikx*naky] = nLinks[c];
         nChains_map[iky + ikx*naky] = nChains[c];
       }

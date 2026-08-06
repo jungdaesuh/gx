@@ -133,8 +133,6 @@ GradPerp::GradPerp(Parameters* pars, Grids* grids, int batch_size, int mem_size,
 GradPerp::~GradPerp()
 {
   if (tmp)      cudaFree (tmp);
- // if (iKxtmp)   cudaFree (iKxtmp);
- // if (iKxtmp2)  cudaFree (iKxtmp2);
   cufftDestroy ( gradperp_plan_R2C    );
   cufftDestroy ( gradperp_plan_C2R    );
   cufftDestroy ( gradperp_plan_dxC2R  );

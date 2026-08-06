@@ -95,9 +95,7 @@ GradParallelNTFT::GradParallelNTFT(Parameters* pars, Grids* grids)
   G_linked = (cuComplex**) malloc(sizeof(cuComplex*)*nClasses);
   kzLinked = (float**) malloc(sizeof(float*)*nClasses);
 
-  //  printf("nClasses = %d\n", nClasses);
   for(int c=0; c<nClasses; c++) {
-        //printf("\tClass %d: nChains = %d, nLinks = %d\n", c, nChains[c], nLinks[c]);
 
     // The NTFT treats nLinks as the number of grid points per chain because it is not always a
     // a multiple of Nz, so this section is the same as the linked version without multiplying by Nz
@@ -177,10 +175,8 @@ GradParallelNTFT::GradParallelNTFT(Parameters* pars, Grids* grids)
     dB[c] = dim3(nt1, nt2, nt3);
     dG[c] = dim3(nb1, nb2, nb3);
     
-    //    dB[c] = dim3(32,4,4);
     //    dG[c] = dim3(1 + (grids_->Nz-1)/dB[c].x,
     //		 1 + (nLinks[c]*nChains[c]-1)/dB[c].y,
-    //		 1 + (grids_->Nmoms-1)/dB[c].z);
   }
   set_callbacks();
   
@@ -264,15 +260,6 @@ void GradParallelNTFT::dealias(cuComplex* f)
 void GradParallelNTFT::zft(MomentsG* G) 
 {
   for(int c=0; c<nClasses; c++) {
-    /*
-    int nlin, nch;
-
-    int *ifac;
-    cudaMalloc((void**) &ifac, sizeof(int)*nlin*nch);
-    CP_TO_CPU(&ifac, ikxLinked[c], sizeof(int)*nlin*nch);
-    for (int j=0; j<nlin*nch; j++) printf("ikxLinked[%d] = %d \n", j, ifac[j]);
-    cudaFree(ifac);
-    */				       
     linkedCopyNTFT GCHAINS (G->G(), G_linked[c], nLinks[c], nChains[c], ikxLinked[c], ikyLinked[c], grids_->Nmoms);
 
     checkCuda(cufftExecC2C (zft_plan_forward[c], G_linked[c], G_linked[c], CUFFT_FORWARD));
@@ -512,7 +499,6 @@ int GradParallelNTFT::get_nClasses_ntft(int *mode_size, int *mode_size_ref, int 
 	 // add one to the mode length corresponding to that grid point, this is analagous to n_k
 	 mode_size[mode_nums[idy + naky * (idx + nakx * idz)]-1]++;
        	 mode_size_ref[mode_nums[idy + naky * (idx + nakx * idz)]-1]++; //should be identical arrays
-	 //printf("%3d ", mode_nums[idy + naky * (idx + nakx * idz)]); //uncomment these three print statements to see a visual of the NTFT kx/z grid
        }
        //printf("\n");
     }
