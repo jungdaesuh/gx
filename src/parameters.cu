@@ -236,10 +236,6 @@ void Parameters::get_nml_vars(char* filename)
   init_single = toml::find_or <bool>   (tnml, "init_single", false );
   ikx_single  = toml::find_or <int>    (tnml, "ikx_single",      0 );
   iky_single  = toml::find_or <int>    (tnml, "iky_single",      1 );
-  ikx_fixed   = toml::find_or <int>    (tnml, "ikx_fixed",      -1 );
-  iky_fixed   = toml::find_or <int>    (tnml, "iky_fixed",      -1 );
-  eqfix       = toml::find_or <bool>   (tnml, "eqfix",       false );
-  secondary   = toml::find_or <bool>   (tnml, "secondary",   false );
   phi_ext     = toml::find_or <float>  (tnml, "phi_ext",       0.0 );
   source      = toml::find_or <string> (tnml, "source",  "default" );
   hegna       = toml::find_or <bool>   (tnml, "hegna",       false );
@@ -620,21 +616,6 @@ void Parameters::get_nml_vars(char* filename)
   if (scheme == "rk3")   scheme_opt = Tmethod::rk3;
   if (scheme == "sspx2") scheme_opt = Tmethod::sspx2;
 
-  if (eqfix && iproc==0 && scheme_opt == Tmethod::k10) {
-    printf("\n");
-    printf("\n");
-    printf(ANSI_COLOR_MAGENTA);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_GREEN);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RED);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_BLUE);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RESET);    
-    printf("\n");
-    printf("\n");
-  }  
   //  printf("scheme_opt = %d \n",scheme_opt);
     
   if( source == "phiext_full") {
@@ -843,10 +824,6 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_var (nc_expert, "init_single",           NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "ikx_single",            NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "iky_single",            NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "ikx_fixed",             NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "iky_fixed",             NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "eqfix",                 NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "secondary",             NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "phi_ext",               NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "source_dum",            NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_put_att_text (nc_expert, ivar, "value", source.size(), source.c_str())) ERR(retval);
@@ -1005,11 +982,7 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
 
   putint   (nc_expert, "nreal",   nreal);
   putint   (nc_expert, "i_share", i_share);
-  putint   (nc_expert, "ikx_fixed",  ikx_fixed  );
-  putint   (nc_expert, "iky_fixed",  iky_fixed  );
-  putbool  (nc_expert, "eqfix",      eqfix      );
   putbool  (nc_expert, "init_single", init_single  );
-  putbool  (nc_expert, "secondary",   secondary    );
   putbool  (nc_expert, "hegna",       hegna        );
   put_real (nc_expert, "phi_ext",     phi_ext      );
   putint   (nc_expert, "ikx_single",  ikx_single   );

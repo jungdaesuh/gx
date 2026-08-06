@@ -171,9 +171,9 @@ TEST(HipComplexOperators, AddScaledUsesRealDoubleCoefficients)
   ASSERT_EQ(cudaSuccess, cudaMemcpy(second_device, second, sizeof(second),
                                     cudaMemcpyHostToDevice));
 
-  setdev_constants(2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1);
+  setdev_constants(2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1);
   add_scaled_kernel<<<1, 2>>>(result_device, 2.0, first_device, -0.5,
-                              second_device, true);
+                              second_device);
   ASSERT_EQ(cudaSuccess, cudaGetLastError());
 
   cuComplex result[2];

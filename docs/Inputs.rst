@@ -982,18 +982,6 @@ The ``[Expert]`` group controls parameters reserved for expert users.
      - Index of the ky mode to be initialized if ``init_single`` is true
      - **1**
    * - ``[Expert]``
-     - eqfix
-     - Do not evolve some particular Fourier harmonic
-     - **false**
-   * - ``[Expert]``
-     - ikx_fixed
-     - Index of the kx mode to be fixed in time if ``eqfix`` is true
-     - **-1**
-   * - ``[Expert]``
-     - iky_fixed
-     - Index of the ky mode to be fixed in time if ``eqfix`` is true
-     - **-1**
-   * - ``[Expert]``
      - phi_ext
      - Value of phi to use for a Rosenbluth-Hinton test
      - **0.0**

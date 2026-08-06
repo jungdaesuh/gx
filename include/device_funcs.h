@@ -60,7 +60,7 @@ __host__ __device__ cuDoubleComplex operator/(cuDoubleComplex f, cuDoubleComplex
 
 __global__ void maskG(cuComplex* g);
 
-void setdev_constants(int Nx, int Ny, int Nyc, int Nz, int Nspecies, int Nm, int Nl, int Nj, int Zp, int ikxf, int ikyf,
+void setdev_constants(int Nx, int Ny, int Nyc, int Nz, int Nspecies, int Nm, int Nl, int Nj, int Zp,
 		      int is_lo_in, int is_up_in, int m_lo_in, int m_up_in, int m_ghost_in, int Nm_glob);
 
 
@@ -92,28 +92,6 @@ __global__ void add_scaled_kernel(cuComplex* res,
 				  double c4, const cuComplex* m4,
 				  double c5, const cuComplex* m5);
 
-__global__ void add_scaled_kernel(cuComplex* res,
-				  double c1, const cuComplex* m1,
-				  double c2, const cuComplex* m2, bool bdum);
-
-__global__ void add_scaled_kernel(cuComplex* res,
-				  double c1, const cuComplex* m1,
-				  double c2, const cuComplex* m2,
-				  double c3, const cuComplex* m3, bool bdum);
-
-__global__ void add_scaled_kernel(cuComplex* res, 
-				  double c1, const cuComplex* m1,
-				  double c2, const cuComplex* m2, 
-				  double c3, const cuComplex* m3,
-				  double c4, const cuComplex* m4, bool bdum);
-
-__global__ void add_scaled_kernel(cuComplex* res, 
-				  double c1, const cuComplex* m1,
-				  double c2, const cuComplex* m2, 
-				  double c3, const cuComplex* m3,
-				  double c4, const cuComplex* m4,
-				  double c5, const cuComplex* m5, bool bdum);
-
 __global__ void setval(float* f, float val, int N);
 __global__ void setval(double* f, double val, int N);
 __global__ void setval(cuComplex* f, cuComplex val, int N);
@@ -122,7 +100,6 @@ __global__ void scale_kernel(cuComplex* res, double s);
 __global__ void scale_kernel(cuComplex* res, cuComplex s);
 __global__ void scale_singlemom_kernel(cuComplex* res, cuComplex* m, cuComplex s);
 __global__ void scale_singlemom_kernel(cuComplex* res, cuComplex* m, float scalar);
-// Should we have some eqfix options in the singlemom_kernels? 
 
 __global__ void add_section(cuComplex *res, const cuComplex *tmp, int ntot);
 

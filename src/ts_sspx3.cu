@@ -68,7 +68,6 @@ void SSPx3::EulerStep(MomentsG** G1, MomentsG** G, MomentsG* GRhs, Fields* f, bo
     // start sync first, so that we can overlap it with computation below
     G[is]->sync();
 
-    if (pars_->eqfix) G1[is]->copyFrom(G[is]);   
 
     // compute timestep (if necessary)
     if (setdt && is==0 && !pars_->fixed_dt) { // dt will be computed same for all species, so just do first time through species loop

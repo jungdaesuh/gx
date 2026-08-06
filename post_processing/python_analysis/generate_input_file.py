@@ -472,12 +472,6 @@ def write_expert(file, data):
         file.write("\n iky_single  = {}        # Index of the ky mode to be initialized".format(data['Inputs']['Expert']['iky_single']))
         par_count += 1
 
-    if bool(data['Inputs']['Expert']['eqfix']):
-        file.write("\n\n eqfix     = {}    # Do not evolve some particular Fourier harmonic".format(str(bool(data['Inputs']['Expert']['eqfix'])).lower()))
-        file.write("\n ikx_fixed = {}       # Index of the kx mode to be initialized".format(data['Inputs']['Expert']['ikx_fixed']))
-        file.write("\n iky_fixed = {}       # Index of the ky mode to be initialized".format(data['Inputs']['Expert']['iky_fixed']))
-        par_count += 1 
-
     if bool(par_count == 0):
         file.write("\n # No expert parameters were specified. See documentation for further details.")
 

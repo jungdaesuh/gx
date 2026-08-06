@@ -55,7 +55,6 @@ void RungeKutta4::partial(MomentsG** G, MomentsG** Gt, Fields *f, MomentsG** Rhs
     // start sync first, so that we can overlap it with computation below
     Gt[is]->sync();
 
-    if (pars_->eqfix) Gnew[is]->copyFrom(G[is]);
 
     // compute and increment nonlinear term
     Rhs[is]->set_zero();

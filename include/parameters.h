@@ -74,7 +74,7 @@ class Parameters {
   int forcing_index, smith_par_q, smith_perp_q, forcing_kz, forcing_k2min, forcing_k2max;
   int equilibrium_type, source_option, p_hyper, iphi00;
   int i_share;
-  int iky_single, ikx_single, iky_fixed, ikx_fixed;
+  int iky_single, ikx_single;
   int Boltzmann_opt;
   int stages;
   int geoType, iflux, isym;
@@ -143,12 +143,12 @@ class Parameters {
   bool write_xyPhi; 
   bool write_xyApar; 
 
-  bool nonlinear_mode, linear, secondary, local_limit, hyper, HB_hyper;
+  bool nonlinear_mode, linear, local_limit, hyper, HB_hyper;
   bool hyperz;
   bool slab, hypercollisions_const, hypercollisions_kz;
   bool write_omega, write_rh, write_phi, restart, restart_if_exists, save_for_restart, restart_with_perturb, append_on_restart;
   bool fixed_amplitude, write_fields, write_eigenfuncs; 
-  bool eqfix, write_pzt, collisions, domain_change;
+  bool write_pzt, collisions, domain_change;
   bool const_curv;
   bool ExBshear;
   bool nlpm_kxdep;

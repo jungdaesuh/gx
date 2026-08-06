@@ -285,23 +285,20 @@ void MomentsG::mask(void) {maskG GALL (G());}
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2,
 			  double c3, MomentsG* G3) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2,
 			  double c3, MomentsG* G3,
 			  double c4, MomentsG* G4) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
@@ -310,8 +307,7 @@ void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c4, MomentsG* G4,
 			  double c5, MomentsG* G5)
 {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), c5, G5->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), c5, G5->G());
 }
 
 void MomentsG::reality()

@@ -2,7 +2,7 @@
 #include "device_funcs.h"
 #include <cmath>
 
-__device__ __constant__ int nx, ny, nyc, nz, nspecies, nm, nl, nj, zp, ikx_fixed, iky_fixed, is_lo, is_up, m_lo, m_up, m_ghost, nm_glob;
+__device__ __constant__ int nx, ny, nyc, nz, nspecies, nm, nl, nj, zp, is_lo, is_up, m_lo, m_up, m_ghost, nm_glob;
 
 void setdev_constants(int Nx,
 		      int Ny,
@@ -13,8 +13,6 @@ void setdev_constants(int Nx,
 		      int Nl,
 		      int Nj,
 		      int Zp,
-		      int ikxf,
-		      int ikyf,
 		      int is_lo_in,
 		      int is_up_in,
 		      int m_lo_in,
@@ -32,8 +30,6 @@ void setdev_constants(int Nx,
   cudaMemcpyToSymbol(GPU_SYMBOL( nl),        &Nl,         sizeof(int));
   cudaMemcpyToSymbol(GPU_SYMBOL( nj),        &Nj,         sizeof(int));
   cudaMemcpyToSymbol(GPU_SYMBOL( zp),        &Zp,         sizeof(int));
-  cudaMemcpyToSymbol(GPU_SYMBOL( ikx_fixed), &ikxf,       sizeof(int));
-  cudaMemcpyToSymbol(GPU_SYMBOL( iky_fixed), &ikyf,       sizeof(int));
   cudaMemcpyToSymbol(GPU_SYMBOL( is_lo),     &is_lo_in,   sizeof(int));
   cudaMemcpyToSymbol(GPU_SYMBOL( is_up),     &is_up_in,   sizeof(int));
   cudaMemcpyToSymbol(GPU_SYMBOL( m_lo),      &m_lo_in,    sizeof(int));
@@ -382,14 +378,6 @@ __device__ int get_idx(int ikx) {
 // idx is the grid ordered as [0,1,.. nx/2, -nx/2 +1, ..., -1], FFT order
 
 
-__device__ bool not_fixed_eq(int idxyz) {
-  int idxy_fixed = iky_fixed + ikx_fixed*nyc;
-  if ( idxyz%(nx*nyc) == idxy_fixed )
-    return false;
-  else
-    return true;
-}
-
 __global__ void phiSolve_krehm (cuComplex *phi, cuComplex *G0, float* kx, float* ky, float rho_i)
 {
   idXYZ;
@@ -474,49 +462,35 @@ __global__ void add_scaled_singlemom_kernel(cuComplex* res,
   if (idxyz < nx*nyc*nz) res[idxyz] = c1*m1[idxyz] + c2*m2[idxyz];
 }
 
-/*
-
-!eqfix            false  true    false   true     
-not_fixed_eq      true   true    false   false 
- 
-action            true   true    false    true
-
-bool proceed == (!eqfix || not_fixed_eq);
-*/
-
 __global__ void add_scaled_kernel(cuComplex* res,
 				  double c1, const cuComplex* m1,
-				  double c2, const cuComplex* m2, bool neqfix = true)
+				  double c2, const cuComplex* m2)
 {
   unsigned int idxy = get_id1(); 
   unsigned int idz  = get_id2();
   unsigned int idlm = get_id3();
 
   if (idxy < nx*nyc && idz < nz && idlm < nl*nm) {
-    if (neqfix || not_fixed_eq(idxy)) {
-      
-      unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
-      
-      res[ig] = c1 * m1[ig] + c2 * m2[ig];
-    }
+    
+    unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
+    
+    res[ig] = c1 * m1[ig] + c2 * m2[ig];
   }
 }
 
 __global__ void add_scaled_kernel(cuComplex* res,
 				  double c1, const cuComplex* m1,
 				  double c2, const cuComplex* m2,
-				  double c3, const cuComplex* m3, bool neqfix = true)
+				  double c3, const cuComplex* m3)
 {
   unsigned int idxy = get_id1(); 
   unsigned int idz  = get_id2();
   unsigned int idlm = get_id3(); 
   if (idxy < nx*nyc && idz < nz && idlm < nl*nm) {
-    if (neqfix || not_fixed_eq(idxy)) {
-      
-      unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
-      
-      res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig];
-    }
+    
+    unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
+    
+    res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig];
   }
 }
 
@@ -524,18 +498,16 @@ __global__ void add_scaled_kernel(cuComplex* res,
 				  double c1, const cuComplex* m1,
 				  double c2, const cuComplex* m2, 
 				  double c3, const cuComplex* m3,
-				  double c4, const cuComplex* m4, bool neqfix = true)
+				  double c4, const cuComplex* m4)
 {
   unsigned int idxy = get_id1(); 
   unsigned int idz  = get_id2();
   unsigned int idlm = get_id3(); 
   if (idxy < nx*nyc && idz < nz && idlm < nl*nm) {
-    if (neqfix || not_fixed_eq(idxy)) {
-      
-      unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
-      
-      res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig] + c4 * m4[ig];
-    }
+    
+    unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
+    
+    res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig] + c4 * m4[ig];
   }
 }
 
@@ -544,18 +516,16 @@ __global__ void add_scaled_kernel(cuComplex* res,
 				  double c2, const cuComplex* m2, 
 				  double c3, const cuComplex* m3,
 				  double c4, const cuComplex* m4,
-				  double c5, const cuComplex* m5, bool neqfix = true)
+				  double c5, const cuComplex* m5)
 {
   unsigned int idxy = get_id1(); 
   unsigned int idz  = get_id2();
   unsigned int idlm = get_id3(); 
   if (idxy < nx*nyc && idz < nz && idlm < nl*nm) {
-    if (neqfix || not_fixed_eq(idxy)) {
-      
-      unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
+    
+    unsigned int ig = idxy + nx*nyc*(idz + nz*idlm);
 	
-      res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig] + c4 * m4[ig] + c5 * m5[ig];
-    }
+    res[ig] = c1 * m1[ig] + c2 * m2[ig] + c3 * m3[ig] + c4 * m4[ig] + c5 * m5[ig];
   }
 }
 

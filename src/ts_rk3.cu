@@ -52,7 +52,6 @@ void RungeKutta3::partial(MomentsG** G, MomentsG** Gt, Fields *f, MomentsG** Rhs
     // start sync first, so that we can overlap it with computation below
     Gt[is]->sync();
 
-    if (pars_->eqfix) Gnew[is]->copyFrom(G[is]);
 
     // compute timestep (if necessary)
     if (setdt && is==0 && !pars_->fixed_dt ) { // dt will be computed same for all species, so just do first time through species loop
