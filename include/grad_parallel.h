@@ -103,7 +103,6 @@ class GradParallelLinked : public GradParallel {
   cufftHandle * hyperz_plan_forward; cufftHandle * hyperz_plan_inverse;
 
   cufftHandle * zft_plan_forward_singlemom;
-  cufftHandle * zft_plan_inverse_singlemom;
 
   cufftHandle * dz_plan_forward_singlemom;
   cufftHandle * dz_plan_inverse_singlemom;
@@ -172,7 +171,6 @@ class GradParallelNTFT : public GradParallel {
   cufftHandle * hyperz_plan_forward; cufftHandle * hyperz_plan_inverse;
 
   cufftHandle * zft_plan_forward_singlemom;
-  cufftHandle * zft_plan_inverse_singlemom;
 
   cufftHandle * dz_plan_forward_singlemom;
   cufftHandle * dz_plan_inverse_singlemom;

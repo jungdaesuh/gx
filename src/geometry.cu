@@ -1,9 +1,9 @@
 #include "geometry.h"
 #include "vmec_variables.h"
 #include "geometric_coefficients.h"
+#include "geometry_modules/vmec/include/solver.h"
 #define GGEO <<< dimGrid, dimBlock >>>
 
-#include "geometry_modules/vmec/include/solver.h"
 #include <fstream>
 #include <iostream>
 #include <string>

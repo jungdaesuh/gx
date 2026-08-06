@@ -4,7 +4,6 @@
 #define GBX <<< dGx, dBx >>>
 #define GBX_single <<< dGx_single, dBx_single >>>
 #define GBX_ntft <<<dGx_ntft, dBx_ntft >>>
-#define GBX_single_ntft <<<dGx_single_ntft, dBx_single_ntft>>>
 
 //===========================================
 // Nonlinear_GK
@@ -104,9 +103,7 @@ Nonlinear_GK::Nonlinear_GK(Parameters* pars, Grids* grids, Geometry* geo) :
 
   fXY = dphi; // this is just a pointer for use in diagnostics
 
-  int nxyz = grids_->NxNyNz;
   int nlag = grids_->Nj;
-  int nher = grids_->Nm;
 
   int nbx = 256;  int ngx = 1 + (grids_->NxNyNz*grids_->Nj - 1)/nbx;
   int nby = 1;  int ngy = 1;
@@ -136,12 +133,6 @@ Nonlinear_GK::Nonlinear_GK(Parameters* pars, Grids* grids, Geometry* geo) :
   dBk = dim3(nbx, nby, 1);
   dGk = dim3(ngx, ngy, 1);
 
-  cfl_x_inv = (float) grids_->Nx/2 / (pars_->cfl * pars_->x0);
-  cfl_y_inv = (float) grids_->Ny/2 / (pars_->cfl * pars_->y0); 
-//  cfl_x_inv = (float) grids_->Nx / (pars_->cfl * 2 * M_PI * pars_->x0);
-//  cfl_y_inv = (float) grids_->Ny / (pars_->cfl * 2 * M_PI * pars_->y0);
-  
-  dt_cfl = 0.;
 
   red_d_temp_storage = nullptr;
   red_temp_storage_bytes = 0;
@@ -428,10 +419,6 @@ Nonlinear_KREHM::Nonlinear_KREHM(Parameters* pars, Grids* grids) :
   dBk = dim3(nbx, 1, 1);
   dGk = dim3(ngx, 1, 1);
 
-  cfl_x_inv = (float) grids_->Nx / (pars_->cfl * 2 * M_PI * pars_->x0);
-  cfl_y_inv = (float) grids_->Ny / (pars_->cfl * 2 * M_PI * pars_->y0); 
-  
-  dt_cfl = 0.;
 
   rho_s = pars->rho_s;
   d_e = pars->d_e;

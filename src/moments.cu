@@ -1,6 +1,3 @@
-#include <random>
-#include <algorithm>
-#include <vector>
 #include "ncdf.h"
 #include "moments.h"
 #define GALL <<< dG_all, dB_all >>>
@@ -311,10 +308,6 @@ void MomentsG::initialConditions(double* time) {
 void MomentsG::scale(double    scalar) {scale_kernel GALL (G(), scalar);}
 void MomentsG::scale(cuComplex scalar) {scale_kernel GALL (G(), scalar);}
 void MomentsG::mask(void) {maskG GALL (G());}
-
-void MomentsG::rescale(float * phi_max) {
-  rescale_kernel GALL (G(), phi_max, grids_->Nm*grids_->Nl);
-}
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2) {
@@ -812,20 +805,6 @@ void MomentsG::restart_read(double* time)
   mask();
   
   free(G_h);
-}
-
-void MomentsG::qvar(int N)
-{
-  cuComplex* G_h;
-  int Nk = grids_->NxNycNz;
-  G_h = (cuComplex*) malloc (sizeof(cuComplex)*N);
-  for (int i=0; i<N; i++) {G_h[i].x = 0.; G_h[i].y = 0.;}
-  CP_TO_CPU (G_h, G_lm, N*sizeof(cuComplex));
-  printf("\n");
-  for (int i=0; i<N; i++) printf("m var(%d,%d) = (%e, %e) \n", i%Nk, i/Nk, G_h[i].x, G_h[i].y);
-  printf("\n");
-
-  free (G_h);
 }
 
 void MomentsG::update_tprim(double time) {

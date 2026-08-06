@@ -58,7 +58,6 @@ class Grids {
   ncclComm_t ncclComm, ncclComm_s, ncclComm_m, ncclComm_m0;
   ncclUniqueId ncclId, ncclId_m0;
   std::vector<ncclUniqueId> ncclId_s, ncclId_m;
-  cudaStream_t ncclStream;
 
   int iproc, nprocs;
   int iproc_m, nprocs_m;

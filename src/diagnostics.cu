@@ -1,5 +1,4 @@
 #include "diagnostics.h"
-#include "get_error.h"
 #include "netcdf.h"
 #include <sys/stat.h>
 #define loop_R <<< dG_spectra, dB_spectra >>>

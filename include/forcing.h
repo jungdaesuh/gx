@@ -34,7 +34,6 @@ class HeliInjForcing : public Forcing {
   int k2max;
   int kx;
   int ky;
-  int mag_squared;
   int kz;
   int Nz;
   cuComplex rf;

@@ -1,7 +1,6 @@
 #include "grad_perp.h"
 #include "device_funcs.h"
 #include "get_error.h"
-#define GBK <<< dGk, dBk >>>
 #define GBK_ntft <<< dGk_ntft, dBk_ntft >>>
 #define GBX_ntft <<< dGx_ntft, dBx_ntft >>>
 #define GBX_single_ntft <<< dGx_single_ntft, dBx_single_ntft >>>

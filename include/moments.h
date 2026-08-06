@@ -36,14 +36,11 @@ class MomentsG {
   }
 
   void update_tprim(double time);
-  void qvar (int N);
-  void apply_mask(void);
   void initVP(double* time);
   void initialConditions(double* time=nullptr);
   void restart_write(int nc, int id);
   void restart_read(double* time);
   
-  void rescale(float * phi_max);  
   
   void add_scaled(double c1, MomentsG* G1, double c2, MomentsG* G2);
   void add_scaled(double c1, MomentsG* G1, double c2, MomentsG* G2, double c3, MomentsG* G3);

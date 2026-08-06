@@ -1,17 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>
-#include <random>
-#include <vector>
-#include <algorithm>
 #include <iostream>
 #include <ctime>
 #include "run_gx.h"
 #include "version.h"
 // #include "reservoir.h"
-#include "reductions.h"
 #include <fenv.h>
-#include <limits.h>
 
 int main(int argc, char* argv[])
 {
