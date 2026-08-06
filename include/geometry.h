@@ -102,11 +102,6 @@ class S_alpha_geo : public Geometry {
 
 };
 
-class Gs2_geo : public Geometry {
- public:
-  Gs2_geo();
-};
-
 class geo_nc : public Geometry {
  public:
   geo_nc(Parameters* parameters, Grids* grids);

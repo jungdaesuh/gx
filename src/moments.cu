@@ -44,30 +44,7 @@ MomentsG::MomentsG(Parameters* pars, Grids* grids, int is_glob) :
 
   int nn1, nn2, nn3, nt1, nt2, nt3, nb1, nb2, nb3;
   
-  if (pars_->ks) {
-
-    printf("initializing Kuramoto-Sivashinsky\n");
-    nn1 = grids_->Nyc;                 nt1 = min(nn1, 128);    nb1 = 1 + (nn1-1)/nt1;
-    nn2 = 1;                           nt2 = min(nn2,   1);    nb2 = 1 + (nn2-1)/nt2;
-    nn3 = 1;                           nt3 = min(nn3,   1);    nb3 = 1 + (nn3-1)/nt3;
-    
-    dB_all   = dim3(nt1, nt2, nt3);    dG_all   = dim3(nb1, nb2, nb3);
-    dimBlock = dim3(nt1, nt2, nt3);    dimGrid  = dim3(nb1, nb2, nb3);
-    return;
-  } 
-
-  if (pars_->vp) {
-    printf("initializing Vlasov-Poisson\n");
-    nn1 = grids_->Nyc;                 nt1 = min(nn1, 128);    nb1 = 1 + (nn1-1)/nt1;
-    nn2 = 1;                           nt2 = min(nn2,   1);    nb2 = 1 + (nn2-1)/nt2;
-    nn3 = 1;                           nt3 = min(nn3,   1);    nb3 = 1 + (nn3-1)/nt3;
-    
-    dB_all   = dim3(nt1, nt2, nt3);
-    dG_all   = dim3(nb1, nb2, nb3);
-    return;
-  }
-  
-  nn1 = grids_->Nyc*grids_->Nx;    nt1 = min(nn1, WARPSIZE);    nb1 = (nn1-1)/nt1 + 1;
+nn1 = grids_->Nyc*grids_->Nx;    nt1 = min(nn1, WARPSIZE);    nb1 = (nn1-1)/nt1 + 1;
   nn2 = grids_->Nz;                nt2 = min(nn2, (int) 512/WARPSIZE);    nb2 = (nn2-1)/nt2 + 1;
   nn3 = grids_->Nm*grids_->Nl;     nt3 = min(nn3,  1);    nb3 = (nn3-1)/nt3 + 1;
   
@@ -127,10 +104,7 @@ void MomentsG::initialConditions(double* time) {
     init_h[idx].y = 0.;
   }
   
-  if (pars_->ks) {
-    init_h[1].x =  0.5;
-    init_h[2].y = -0.25;
-  } else {
+  {
   
     if(pars_->init_single) {
       //initialize single mode

@@ -118,8 +118,8 @@ class Parameters {
   void set_jtwist_x0(float* shat, float *gds21, float *gds22);
 
   int ncresid;
-  int nc_geo, nc_time, nc_ks, nc_vp, nc_rst, nc_dom, nc_diag, nc_krehm, nc_cetg;
-  int nc_expert, nc_resize, nc_con, nc_frc, nc_bz, nc_ml, nc_spec;
+  int nc_geo, nc_time, nc_rst, nc_dom, nc_diag, nc_krehm;
+  int nc_expert, nc_resize, nc_con, nc_frc, nc_bz, nc_spec;
   int p_HB, p_hyper_l, p_hyper_m, p_hyper_lm, irho, nwrite, nwrite_big, navg, nsave, igeo, nreal;
   int p_hyper_z;
   int nz_in, nperiod, Zp, bishop;
@@ -137,7 +137,6 @@ class Parameters {
   int q0_dens_switch;
   // formerly part of time struct
   int trinity_timestep, trinity_iteration, trinity_conv_count, end_time;   
-  int ResQ, ResK, ResTrainingSteps, ResTrainingDelta, ResPredict_Steps; 
   
   inits initf;
   stirs stirf;
@@ -156,15 +155,9 @@ class Parameters {
   float nu_hyper_z;
   float D_HB, w_osc;
   float high_cutoff;
-  float ion_z;
   float margin_cpu_time;
   //  float NLdensfac, NLuparfac, NLtparfac, NLtprpfac, NLqparfac, NLqprpfac;
   float tp_t0, tp_tf, tprim0, tprimf;
-  float ks_t0, ks_tf, ks_eps0, ks_epsf;
-  float ResSpectralRadius, ResReg, ResSigma, ResSigmaNoise; 
-  float eps_ks;
-  float vp_nu, vp_nuh;
-  int vp_alpha, vp_alpha_h;
   float vtmax, tzmax, etamax, vtmin;
   float delrho, p_prime_input, invLp_input, alpha_input;
   float B_ref, a_ref, grhoavg, surfarea;
@@ -188,12 +181,10 @@ class Parameters {
   float ne, Te;
 
   bool snyder_electrons;
-  bool all_kinetic, ks, gx, add_Boltzmann_species, write_ks, random_init;
+  bool all_kinetic, gx, add_Boltzmann_species, random_init;
   bool gaussian_init;
   float gauss_env_const_coeff, gauss_env_sin_coeff;
   float gaussian_width;
-  bool vp, vp_closure;
-  bool cetg;  
   bool write_all_kmom, write_xymom, write_all_xymom, write_all_avgz;
   bool zero_shat;
   bool nonTwist;
@@ -214,7 +205,7 @@ class Parameters {
   bool write_omega, write_rh, write_phi, restart, restart_if_exists, save_for_restart, restart_with_perturb, append_on_restart;
   bool fixed_amplitude, write_fields, write_eigenfuncs; 
   bool eqfix, write_pzt, collisions, domain_change;
-  bool const_curv, add_noise;
+  bool const_curv;
   bool ExBshear;
   bool nlpm_kxdep;
   bool debug, init_single, boundary_option_periodic, forcing_init, no_fields; 
@@ -229,7 +220,6 @@ class Parameters {
   bool write_free_energy, diagnosing_moments, diagnosing_pzt;
   bool qprp0_switch;
   bool no_zderiv;
-  bool Reservoir, ResFakeData, ResWrite, ResBatch;
   bool dealias_kz;
   bool hegna;  // bb6126 - hegna test
   bool ei_colls, coll_conservation;

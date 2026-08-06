@@ -431,10 +431,6 @@ S_alpha_geo::S_alpha_geo(Parameters *pars, Grids *grids)
   initializeOperatorArrays(pars, grids);
 }
 
-Gs2_geo::Gs2_geo() {
-
-}
-
 geo_nc::geo_nc(Parameters *pars, Grids *grids)
 {
   if(grids->iproc==0) printf("READING NC GEO\n");

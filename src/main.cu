@@ -5,7 +5,6 @@
 #include <ctime>
 #include "run_gx.h"
 #include "version.h"
-// #include "reservoir.h"
 #include <fenv.h>
 
 int main(int argc, char* argv[])
