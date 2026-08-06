@@ -84,13 +84,6 @@ void RungeKutta4::partial(MomentsG** G, MomentsG** Gt, Fields *f, MomentsG** Rhs
 
 void RungeKutta4::advance(double *t, MomentsG** G, Fields* f)
 {
-  // update the gradients if they are evolving
-  for(int is=0; is<grids_->Nspecies; is++) {
-    G[is]   -> update_tprim(*t);
-    G_q1[is]-> update_tprim(*t);
-    G_q2[is]-> update_tprim(*t);
-  }
-  
   // if we're changing the timestep, set it now
   if( set_dt )
 	  set_timestep( f );

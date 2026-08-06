@@ -1001,22 +1001,6 @@ The ``[Expert]`` group controls parameters reserved for expert users.
      - source
      - Used to specify various kinds of tests
      - **"default"**
-   * - ``[Expert]``
-     - t0
-     - The time at which to start changing ``tprim``
-     - **-1.0**
-   * - ``[Expert]``
-     - tf
-     - The time at which to stop changing ``tprim``
-     - **-1.0**
-   * - ``[Expert]``
-     - tprim0
-     - The value of ``tprim`` to start with (at time ``t0``)
-     - **-1.0**
-   * - ``[Expert]``
-     - tprimf
-     - The value of ``tprim`` to end with (at time ``tf``)
-     - **-1.0**
 
 Forcing
 +++++++

@@ -35,7 +35,6 @@ class MomentsG {
     return &G_lm[grids_->NxNycNz*(l + grids_->Nl*m)];
   }
 
-  void update_tprim(double time);
   void initVP(double* time);
   void initialConditions(double* time=nullptr);
   void restart_write(int nc, int id);

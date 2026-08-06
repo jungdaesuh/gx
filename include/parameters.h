@@ -102,7 +102,6 @@ class Parameters {
   float high_cutoff;
   float margin_cpu_time;
   //  float NLdensfac, NLuparfac, NLtparfac, NLtprpfac, NLqparfac, NLqprpfac;
-  float tp_t0, tp_tf, tprim0, tprimf;
   float vtmax, tzmax, etamax, vtmin;
   float delrho, p_prime_input, invLp_input, alpha_input;
   float B_ref, a_ref, grhoavg, surfarea;

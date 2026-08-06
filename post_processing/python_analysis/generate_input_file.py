@@ -478,12 +478,6 @@ def write_expert(file, data):
         file.write("\n iky_fixed = {}       # Index of the ky mode to be initialized".format(data['Inputs']['Expert']['iky_fixed']))
         par_count += 1 
 
-    if (data['Inputs']['Expert']['t0'] > 0.0):
-        file.write("\n\n t0     = {}    # The time at which to start changing tprim".format(data['Inputs']['Expert']['t0']))
-        file.write("\n tf     = {}    # The time at which to stop changing tprim".format(data['Inputs']['Expert']['tf']))
-        file.write("\n tprim0 = {}    # The time at which to start changing tprim".format(data['Inputs']['Expert']['tprim0']))
-        file.write("\n tprimf = {}    # The time at which to start changing tprim".format(data['Inputs']['Expert']['tprimf']))
-
     if bool(par_count == 0):
         file.write("\n # No expert parameters were specified. See documentation for further details.")
 

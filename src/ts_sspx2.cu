@@ -66,12 +66,6 @@ void SSPx2::EulerStep(MomentsG** G1, MomentsG** G, MomentsG* GRhs, Fields* f, bo
 
 void SSPx2::advance(double *t, MomentsG** G, Fields* f)
 {
-  // update the gradients if they are evolving
-  for(int is=0; is<grids_->Nspecies; is++) {
-    G[is]->update_tprim(*t);
-    G1[is]->update_tprim(*t);
-  }
-
   // update flow shear terms if using ExB
   if (pars_->ExBshear) {
     exb_->flow_shear_shift(f, dt_);
