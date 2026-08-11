@@ -48,22 +48,16 @@ void set_from_trinity(Parameters *pars, trin_parameters_struct *tpars)
    pars->equilibrium_type = tpars->equilibrium_type;
    if(tpars->restart>0) pars->restart = true;
 
-   //if (tpars->nstep > pars->nstep) {
-   //  printf("ERROR: nstep has been increased above the default value. nstep must be less than or equal to what is in the input file\n");
-   //  exit(1);
-   //}
+   // Trinity's nstep overrides the input-file value unconditionally (below); this was
+   // previously treated as an error if Trinity asked for more steps than the input file.
    pars->trinity_timestep = tpars->trinity_timestep;
    pars->trinity_iteration = tpars->trinity_iteration;
    pars->trinity_conv_count = tpars->trinity_conv_count;
    pars->nstep = tpars->nstep;
    pars->navg = tpars->navg;
-   //pars->end_time = tpars->end_time;
-   //pars->irho = tpars->irho ;
    pars->rhoc = tpars->rhoc ;
-   //pars->eps = tpars->eps;
-   //pars->bishop = tpars->bishop ;
-   //pars->nperiod = tpars->nperiod ;
-   //pars->nz_in = tpars->ntheta ;
+   // Deliberately NOT taken from Trinity: end_time, irho, eps, bishop, nperiod, ntheta.
+   // GX uses its own input-file values for these.
 
  /* Miller parameters*/
    pars->rmaj = tpars->rgeo_local ;
@@ -78,7 +72,7 @@ void set_from_trinity(Parameters *pars, trin_parameters_struct *tpars)
 
   /* Other geometry parameters - Bishop/Greene & Chance*/
    pars->beta_prime_input = tpars->beta_prime_input ;
-   //pars->s_hat_input = tpars->s_hat_input ;
+   // Magnetic shear is deliberately not taken from Trinity either.
 
   /*Flow shear*/
    pars->g_exb = tpars->g_exb ;
@@ -290,7 +284,6 @@ void copy_fluxes_to_trinity(Parameters *pars_, Geometry *geo_, trin_fluxes_struc
   }
 
   // these are placeholders for gx-computed quantities
-  // float heat = 0.;
 
   for(int s=0; s<pars_->nspec_in; s++) {
     if(pars_->add_Boltzmann_species && pars_->Boltzmann_opt == BOLTZMANN_ELECTRONS) {

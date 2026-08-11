@@ -68,7 +68,6 @@ void SSPx3::EulerStep(MomentsG** G1, MomentsG** G, MomentsG* GRhs, Fields* f, bo
     // start sync first, so that we can overlap it with computation below
     G[is]->sync();
 
-    if (pars_->eqfix) G1[is]->copyFrom(G[is]);   
 
     // compute timestep (if necessary)
     if (setdt && is==0 && !pars_->fixed_dt) { // dt will be computed same for all species, so just do first time through species loop
@@ -99,13 +98,6 @@ void SSPx3::EulerStep(MomentsG** G1, MomentsG** G, MomentsG* GRhs, Fields* f, bo
 
 void SSPx3::advance(double *t, MomentsG** G, Fields* f)
 {
-  // update the gradients if they are evolving
-  for(int is=0; is<grids_->Nspecies; is++) {
-    G[is] -> update_tprim(*t);
-    G1[is]-> update_tprim(*t);
-    G2[is]-> update_tprim(*t);
-  }
-
   // update flow shear terms if using ExB
   if (pars_->ExBshear) {
     exb_->flow_shear_shift(f, dt_);

@@ -58,8 +58,6 @@ void Beer42::apply_closures(MomentsG* G, MomentsG* GRhs)
   setval <<< nb, nt >>> (GRhs->G(1, 2), zero, nn);
   setval <<< nb, nt >>> (GRhs->G(1, 3), zero, nn);
 
-  //    cudaMemset(GRhs->G(1, 2, is), 0., sizeof(cuComplex)*grids_->NxNycNz);
-  //    cudaMemset(GRhs->G(1, 3, is), 0., sizeof(cuComplex)*grids_->NxNycNz);
 
   // parallel streaming
   grad_par_->dz(G->G(0, 2), tmp); // roughly d/dz T_par
@@ -76,7 +74,6 @@ void Beer42::apply_closures(MomentsG* G, MomentsG* GRhs)
   
   
   // toroidal terms.  
-  //  beer_toroidal_closures GB (G->G(), GRhs->G(), omegad_, nu, pars_->species);
   beer_toroidal_closures GB (G->G(), GRhs->G(), omegad_, nu, G->species->tz);
 }
 
@@ -224,7 +221,6 @@ void SmithPar::apply_closures(MomentsG* G, MomentsG* GRhs)
   // apply closure to mth hermite equation for all laguerre moments
   for(int l = 0; l < grids_->Nl; l++) {
     
-    //      cudaMemset(clos, 0, sizeof(cuComplex)*grids_->NxNycNz);
     
     int nn = grids_->NxNycNz; int nt = min(nn, 512); int nb = 1 + (nn-1)/nt;
     cuComplex zero = make_cuComplex(0.,0.);

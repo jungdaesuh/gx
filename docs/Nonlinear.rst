@@ -164,30 +164,7 @@ Diagnostics
   [Diagnostics]
    nwrite = 100                    # write diagnostics every 100 timesteps
    fluxes = true                   # compute and write heat and particle fluxes
-  
-  [Wspectra]                       # spectra of W = |G_lm|**2
-  species          = false
-  hermite          = false
-  laguerre         = false
-  hermite_laguerre = true          # W(l,m) (summed over kx, ky, z)
-  kx               = false
-  ky               = true          # W(ky) (summed over kx, z, l, m)
-  kxky             = false
-  z                = false
-  
-  [Pspectra]                      # spectra of P = ( 1 - Gamma_0(b_s) ) |Phi|**2
-  species          = false
-  kx               = false
-  ky               = true         # P(ky) (summed over kx, z)
-  kxky             = false
-  z                = true         # P(z) (summed over kx, ky)
 
-  [Qspectra]                      # spectra of Q (heat flux)
-  kx               = false
-  ky               = true         # Q(ky) (summed over kx, z)
-  kxky             = false
-  z                = true         # Q(z) (summed over kx, ky)
-  
 For nonlinear simulations, a key set of diagnostics are the turbulent fluxes of particles and energy, which are made available by setting ``fluxes=true``. Note that when using a single kinetic species with a Boltzmann species, the particle flux will be zero.
 
 Running the simulation

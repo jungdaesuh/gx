@@ -2,19 +2,8 @@
 #include "gpu_defs.h"
 #include <assert.h>
 
-// Convenience function for checking CUDA runtime API results
-// can be wrapped around any runtime API call. No-op in release builds.
-//inline
-//cudaError_t checkCuda(cudaError_t result)
-//{
-//  cudaDeviceSynchronize();
-//  if (result != cudaSuccess) {
-//    fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(result));
-//    assert(result == cudaSuccess);
-//  } 
-//  return result;
-//}
-
+// Convenience macro for checking CUDA/cuFFT/NCCL runtime API results; wrap it around any runtime
+// API call. Aborts on error, and is always active -- it is not gated on release builds.
 #define checkCuda(val)           __checkCudaErrors__ ( (val), #val, __FILE__, __LINE__ )
 
 template <typename T>
@@ -54,10 +43,3 @@ inline cudaError_t print_cudims(dim3 dimGrid, dim3 dimBlock) {
   printf("dimBlock: %d %d %d dimGrid: %d %d %d\n", dimBlock.x, dimBlock.y, dimBlock.z, dimGrid.x, dimGrid.y, dimGrid.z);
   return checkCuda(cudaGetLastError());
 }
-
-
-//int getError();
-//int getError(char* message);
-//int getError(char* message,int i);
-//int getError(info_struct * info, char* message);
-//int getError(info_struct * info, char* message, int i);

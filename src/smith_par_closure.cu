@@ -11,32 +11,6 @@ void fill_r_matrix (cuDoubleComplex *power_series, cuDoubleComplex **rMatrix, in
 void get_normalized_hermite_coefficients (cuDoubleComplex **matrix, int n, double scaling, char type);
 int linearSolverLU (cusolverDnHandle_t handle, int n, const cuDoubleComplex *Acopy, int lda, const cuDoubleComplex *b, cuDoubleComplex *x); 
 
-/*
-int main() {	
-  
-  int n,q;
-
-	//Request number of A's to find
-	printf("q (# of A terms): ");
-	scanf("%d", &q);
-	
-	//Request a degree for the normalized hermite polynomial
-	printf("n (degree of Hermite moment being closed): ");
-	scanf("%d", &n);
-  printf("\n");
-  
-  cuComplex *x_answer = (cuComplex*) malloc(q*sizeof(cuComplex));
-  
-  smith_par_getAs(n,q, x_answer);
-  
-  for (int i = 0; i < q; i++) {
-    printf("A_n-%d: %f + %fi\n", i+1, cuCrealf(x_answer[i]),cuCimagf(x_answer[i]));
-  }
-  
-  free(x_answer);
-  
-  return 0;
-  } */
 
 /* Pade Approximant to find A coefficients
  * Calculation can be found on pg. 37-38 of Smith's thesis

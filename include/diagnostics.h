@@ -9,7 +9,6 @@
 #include "ncdf.h"
 #include "grad_parallel.h"
 #include "grad_perp.h"
-//#include "reservoir.h"
 #include "diagnostic_classes.h"
 #include "spectra_calc.h"
 #include <memory>
@@ -52,7 +51,6 @@ private:
   MomentsG     ** G_old    ;
   NetCDF       * ncdf_         ;
   NetCDF       * ncdf_big_         ;
-  //Reservoir    * rc            ;
   AllSpectraCalcs * allSpectra_;
   Linear * linear_;
   Nonlinear * nonlinear_;
@@ -93,38 +91,4 @@ private:
   vector<unique_ptr<MomentsDiagnostic>> momentsDiagnosticList;
   FieldsDiagnostic *fieldsDiagnostic;
   FieldsXYDiagnostic *fieldsXYDiagnostic;
-};
-
-class Diagnostics_cetg : public Diagnostics {
- public:
-  Diagnostics_cetg(Parameters *pars, Grids *grids, Geometry *geo);
-  ~Diagnostics_cetg();
-
-  bool loop(MomentsG** G, Fields* fields, double dt, int counter, double time) ;
-  void finish(MomentsG** G, Fields* fields, double time);  
-
-private:
-  float* P2(int s=0) {return &P2s[grids_->NxNycNz*s];}
-  float* G2(int s=0) {return &G2s[grids_->NxNycNz*s];}
-
-  int ndiag; 
-  int ikx_local, iky_local, iz_local;
-  dim3 dG_spectra, dB_spectra, dG_all, dB_all, dbp, dgp; 
-  dim3 dGk, dBk;
- 
-  float fluxDenom; float * flux_fac; 
-  float  volDenom; float * vol_fac ;
-  
-  Geometry     * geo_          ;  
-  Fields       * fields_old    ;
-  NetCDF_ids   * id            ;
-  
-  float        * G2s           ;
-  float        * P2s           ;
-  cuComplex    * omg_d         ;
-  cuComplex    * tmp_omg_h     ;
-  cuComplex    * vEk           ;
-
-  void print_omg (cuComplex *W);
-
 };

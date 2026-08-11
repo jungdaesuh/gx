@@ -22,10 +22,8 @@ class ExB_GK : public ExB {
     Geometry       * geo_     ;
     Parameters     * pars_    ;
     Grids          * grids_   ;
-    MomentsG       * GRhs_par ;
     dim3 dGk, dBk;
     dim3 dimGrid_xy, dimBlock_xy, dimGrid_xyz, dimBlock_xyz, dimGrid_xyzlm, dimBlock_xyzlm;
-    int nt1, dimBlockfield, dimGridfield;
     Fields * fieldsTmp;
     MomentsG  * gTmp;
 };

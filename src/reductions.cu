@@ -1,5 +1,4 @@
 #include "reductions.h"
-#include <iostream>
 
 template<class T> Reduction<T>::Reduction(Grids *grids, std::vector<int32_t> modeFull, std::vector<int32_t> modeReduced, int N) 
  : grids_(grids), modeFull_(modeFull), modeReduced_(modeReduced), N_(N)
