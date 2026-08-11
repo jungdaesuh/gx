@@ -34,14 +34,16 @@ for fname in files:
     iota = 1/data.groups['Geometry'].variables['q'][:]
     try:
         zeta_center = data.groups['Geometry'].variables['zeta_center'][:]
+        nfp = data.groups['Geometry'].variables['nfp'][:]
     except:  # older output files don't have zeta_center, read from eik file instead
         data_geo = Dataset(fname[:-6] + "eik.nc", mode='r')
         zeta_center = data_geo.variables['zeta_center'][:]
+        nfp = data_geo.variables['nfp'][:]
     alpha = -iota*zeta_center
     zeta = (theta - alpha)/iota
     
     theta_p = map_to_periodic_range(theta, -np.pi, np.pi)
-    zeta_p = map_to_periodic_range(zeta, -np.pi/5, np.pi/5)
+    zeta_p = map_to_periodic_range(zeta, -np.pi/nfp, np.pi/nfp)
 
     jacobian = data.groups['Geometry'].variables['jacobian'][:]
     grho = data.groups['Geometry'].variables['grho'][:]
@@ -69,13 +71,13 @@ for fname in files:
     Q_all = np.append(Q_all, Q)
     grho_all = np.append(grho_all, jacobian*grho)
 
-grid_z, grid_t = np.mgrid[-np.pi/5:np.pi/5:100j, -np.pi:np.pi:100j]
+grid_z, grid_t = np.mgrid[-np.pi/nfp:np.pi/nfp:100j, -np.pi:np.pi:100j]
 from scipy.interpolate import griddata
 interp_Q = griddata((zeta_all, theta_all), Q_all, (grid_z, grid_t), method='cubic', fill_value=1e-10)
 interp_grho = griddata((zeta_all, theta_all), grho_all, (grid_z, grid_t), method='cubic', fill_value=1e-10)
-from scipy.integrate import trapz
-int_Q = trapz(trapz(interp_Q, grid_z[:,0]), grid_t[0,:])
-int_grho = trapz(trapz(interp_grho, grid_z[:,0]), grid_t[0,:])
+from scipy.integrate import trapezoid
+int_Q = trapezoid(trapezoid(interp_Q, grid_z[:,0]), grid_t[0,:])
+int_grho = trapezoid(trapezoid(interp_grho, grid_z[:,0]), grid_t[0,:])
 #print("Q = ", int_Q/int_grho)
 
 #if np.min(interp_Q/int_grho) < 0:

@@ -77,6 +77,7 @@ void LaguerreTransform::initTransforms(float* toGrid_h, float* toSpectral_h, flo
 
   float x_L = gsl_vector_get(eval, L-1);
   vmax = x_L;
+  vmax_J = gsl_vector_get(eval, J-1);
 
   for (j=0; j<J; j++) {
     x_i = gsl_vector_get (eval, j); 

@@ -30,7 +30,7 @@ void run_gx(Parameters *pars, Grids *grids, Geometry *geo)
   /////////////////////////////////
   // GX is set up to solve a handful of different equation sets.
   // Some have a geometry associated with them, some do not.
-  // Presently the options are "gx", "krehm", "vp", "ks", and "cetg"
+  // Presently the options are "gx" and "krehm"
   // Most equation sets are undocumented, as they are exploratory or pedagogical in nature
   // 
   if (pars->gx) {
@@ -96,47 +96,6 @@ void run_gx(Parameters *pars, Grids *grids, Geometry *geo)
   }
   checkCuda(cudaGetLastError());
   
-  //////////////////////////////
-  //                          //
-  //     cETG eq              // 
-  //                          //
-  //////////////////////////////  
-  if (pars->cetg) {
-    linear = new Linear_cetg(pars, grids, geo);          
-    if (!pars->linear) nonlinear = new Nonlinear_cetg(pars, grids);    
-
-    solver = new Solver_cetg(pars, grids);
-
-    // set up initial conditions
-    G[0] -> set_zero();
-    G[0] -> initialConditions(&time);   
-    G[0] -> sync();
-    solver -> fieldSolve(G, fields);                
-
-    // 
-    // Adkins defines tau_bar = Ti/(Te Z). Set value for tau_bar with tau_fac in the Boltzmann section of the input file
-    // The default value of tau_bar = 1.0.
-    //
-    // Separately, one can set Z, which enters into the calculations of the c_(1,2,3) coefficients.
-    // Set Z by defining Z_ion in the Boltzmann section of the input file. The default value is 1.0. 
-    //
-    // Adkins defines a hyperdiffusion model with parameters N_nu and nu_perp.
-    // Set nu_perp by defining D_hyper in the Dissipation section of the input file. The default value in GX is 0.1, 
-    // which is quite large for the Adkins model. It is important, therefore, to set the value to what you want.
-    // With Tony's definitions, a typical value would be 0.0005 or smaller. 
-    //
-    // Set N_nu by defining nu_hyper in the Dissipation namelist. The default value is nu_hyper = 2
-    // Actually, the input variable nu_hyper is deprecated and one should set this using p_hyper = 2
-    //
-    // IMPORTANT: You must set hyper = true in the Dissipation namelist to turn this operator on.
-    //
-    // The only remaining parameters to be set are x0, y0, z0, nx, ny, and nz.
-    // Note that Adkins' Lz = 2 pi z0, Ly = 2 pi y0, Lx = 2 pi x0.
-    //
-    // Adkins has no magnetic shear, so set zero_shat = true in the Geometry section of the input file
-    // and choose slab = true to get his slab equations.
-    //
-  }
   checkCuda(cudaGetLastError());
 
   Timestepper * timestep = nullptr;
@@ -158,7 +117,6 @@ void run_gx(Parameters *pars, Grids *grids, Geometry *geo)
   MPI_Barrier(pars->mpcom);
   fflush(stdout);
 
-  //  if (pars->write_moms) diagnostics -> write_init(G, fields);
 
   // TIMESTEP LOOP
   int counter = 0;           float timer = 0;          cudaEvent_t start, stop;    bool checkstop = false;
@@ -191,24 +149,16 @@ void run_gx(Parameters *pars, Grids *grids, Geometry *geo)
 
   if (pars->save_for_restart) diagnostics -> restart_write(G, &time);
 
-  if (pars->eqfix && (pars->scheme_opt == Tmethod::k10) ) {
-    printf("\n");
-    printf("\n");
-    printf(ANSI_COLOR_MAGENTA);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_GREEN);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RED);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_BLUE);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RESET);
-    printf("\n");
-    printf("\n");
-  }
-  
   cudaEventRecord(stop,0);    cudaEventSynchronize(stop);    cudaEventElapsedTime(&timer,start,stop);
-  printf("Total runtime = %f min (%f s / timestep)\n", timer/1000./60., timer/1000./counter);
+
+  // counter is zero if the loop never ran (nstep = 0, or t_max already reached), in which case
+  // there is no per-timestep figure to report -- dividing by it would print inf.
+  if(pars->iproc==0) {
+    if (counter > 0)
+      printf("Total runtime = %f min (%f s / timestep)\n", timer/1000./60., timer/1000./counter);
+    else
+      printf("Total runtime = %f min (no timesteps taken)\n", timer/1000./60.);
+  }
 
   diagnostics->finish(G, fields, time);
 

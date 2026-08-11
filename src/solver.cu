@@ -12,8 +12,6 @@ Solver_GK::Solver_GK(Parameters* pars, Grids* grids, Geometry* geo) :
   qneutFacBpar(nullptr), amperePerpFacPhi(nullptr), amperePerpFacBpar(nullptr)
 {
 
-  if (pars_->ks) return;
-  
   count = grids_->NxNycNz;
   if(pars_->fapar > 0.) count = 2*grids_->NxNycNz;
   if(pars_->fbpar > 0.) count = 3*grids_->NxNycNz;
@@ -61,9 +59,6 @@ Solver_GK::Solver_GK(Parameters* pars, Grids* grids, Geometry* geo) :
     cudaMemset(amperePerpFacBpar, 0., sizeof(float)*grids_->NxNycNz);    
   }
   
-  // int threads, blocks;
-  // threads = min(grids_->NxNycNz, 128);
-  // blocks = 1 + (grids_->NxNycNz-1)/threads;
   
   // compute qneutFacPhi  = sum_s z_s^2*n_s/tau_s*(1- sum_l J_l^2)
   //         qneutFacBpar = -sum_s z_s*n_s*sum_l J_l*(J_l + J_{l-1})
@@ -106,12 +101,6 @@ void Solver_GK::fieldSolve(MomentsG** G, Fields* fields)
 // Calculates all the fields, i.e., phi, apar, bpar
 {
 
-  if (pars_->ks) return;
-  if (pars_->vp) {
-    getPhi GQN (fields->phi, G[0]->G(), grids_->ky);
-    return;
-  }
-  
   if (pars_->no_fields) { zero(fields->phi); return; }
   
   zero(nbar);
@@ -252,104 +241,5 @@ void Solver_KREHM::set_equilibrium_current(MomentsG* G, Fields* fields)
     int m_local = m - grids_->m_lo;
     equilibrium_current_krehm<<<dG, dB>>>(G->Gm(m_local), grids_->kx, grids_->ky, pars_->rho_s, pars_->d_e, fields->apar_ext);
   }
-}
-
-//==========================================
-// Solver_cetg
-// object for handling field solve in the Adkins collisional ETG model
-//==========================================
-Solver_cetg::Solver_cetg(Parameters* pars, Grids* grids) :
-  pars_(pars), grids_(grids)
-{
-  int nn1, nn2, nn3, nt1, nt2, nt3, nb1, nb2, nb3;
-  
-  nn1 = grids_->Nyc;        nt1 = min(nn1, 32 );   nb1 = 1 + (nn1-1)/nt1;
-  nn2 = grids_->Nx;         nt2 = min(nn2,  4 );   nb2 = 1 + (nn2-1)/nt2;
-  nn3 = grids_->Nz;         nt3 = min(nn3,  4 );   nb3 = 1 + (nn3-1)/nt3;
-  
-  dB = dim3(nt1, nt2, nt3);
-  dG = dim3(nb1, nb2, nb3);
-
-  count = grids_->NxNycNz; 
-  size_t cgrid = sizeof(cuComplex)*count;
-  checkCuda(cudaMalloc((void**) &moms, cgrid)); 
-
-  // set pointer for convenience
-  density = moms;
-}
-
-Solver_cetg::~Solver_cetg() 
-{
-  cudaFree(moms);
-}
-
-void Solver_cetg::fieldSolve(MomentsG** G, Fields* fields)
-{
-  if(grids_->iproc_m==0) {
-    CP_ON_GPU(density, G[0]->Gm(0), sizeof(cuComplex)*grids_->NxNycNz);
-  }
-  if(grids_->nprocs>1) {
-    assert(false && "Cannot use multiple GPUs for the Adkins collisional ETG model. \n");
-  }
-  
-  phiSolve_cetg<<<dG, dB>>>(fields->phi, density, pars_->tau_fac);
-}
-
-//=======================================
-// Solver_VP
-// object for handling field solve in VP
-//=======================================
-Solver_VP::Solver_VP(Parameters* pars, Grids* grids) :
-  pars_(pars), grids_(grids)
-{
-
-  int nn1 = grids_->Nyc;        int nt1 = min(nn1, 512);     int nb1 = 1 + (nn1-1)/nt1;
-  
-  dB = dim3(nt1, 1, 1);
-  dG = dim3(nb1, 1, 1);
-  
-}
-
-Solver_VP::~Solver_VP() 
-{
-  // nothing
-}
-
-void Solver_VP::fieldSolve(MomentsG** G, Fields* fields)
-{
-  if (pars_->ks) return;
-
-  getPhi GQN (fields->phi, G[0]->G(), grids_->ky);
-}
-
-void Solver_VP::svar (cuComplex* f, int N)
-{
-  cuComplex* f_h = (cuComplex*) malloc(sizeof(cuComplex)*N);
-
-  for (int i=0; i<N; i++) { f_h[i].x=0.; f_h[i].y=0.; }
-
-  CP_TO_CPU (f_h, f, N*sizeof(cuComplex));
-
-  for (int i=0; i<N; i++) printf("solver: var(%d) = (%e, %e) \n", i, f_h[i].x, f_h[i].y);
-  printf("\n");
-
-  free (f_h);
-}
-
-void Solver_VP::svar (float* f, int N)
-{
-  float* f_h = (float*) malloc(sizeof(float)*N);
-
-  CP_TO_CPU (f_h, f, N*sizeof(float));
-
-  for (int i=0; i<N; i++) printf("solver: var(%d) = %e \n", i, f_h[i]);
-  printf("\n");
-  
-  free (f_h);
-}
-
-void Solver_VP::zero (cuComplex* f)
-{
-  cudaMemset(f, 0., sizeof(cuComplex)*grids_->Nyc);
 }
 

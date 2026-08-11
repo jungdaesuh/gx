@@ -194,42 +194,9 @@ void Parameters::get_nml_vars(char* filename)
   
 
   tnml = nml;
-  if (nml.contains("Collisional_slab_ETG")) tnml = toml::find (nml, "Collisional_slab_ETG"); 
-
-  cetg              = toml::find_or <bool>  (tnml, "cetg",         false );
-
-  if (cetg) gx = false;
-  if (cetg) nm_in = 1;
-  if (cetg) nl_in = 2;
-  
-  tnml = nml;
-  if (nml.contains("Vlasov_Poisson")) tnml = toml::find (nml, "Vlasov_Poisson");
-  
-  vp                = toml::find_or <bool>  (tnml, "vp",         false );
-  vp_closure        = toml::find_or <bool>  (tnml, "vp_closure",  true );
-  vp_nu             = toml::find_or <float> (tnml, "vp_nu",       -1.0 );
-  vp_nuh            = toml::find_or <float> (tnml, "vp_nuh",      -1.0 );
-  vp_alpha          = toml::find_or <int>   (tnml, "vp_alpha",       1 );
-  vp_alpha_h        = toml::find_or <int>   (tnml, "vp_alpha_h",     2 );
-  if (vp) gx = false;
-  
-  tnml = nml;
-  if (nml.contains("KS")) tnml = toml::find (nml, "KS");
-  
-  ks                = toml::find_or <bool>  (tnml, "ks",         false );
-  write_ks          = toml::find_or <bool>  (tnml, "write_ks",   false );
-  eps_ks            = toml::find_or <float> (tnml, "eps_ks",       0.0 );
-  ks_t0             = toml::find_or <float> (tnml, "ks_t0",       -1.0 );
-  ks_tf             = toml::find_or <float> (tnml, "ks_tf",       -1.0 );
-  ks_eps0           = toml::find_or <float> (tnml, "ks_eps0",     -1.0 );
-  ks_epsf           = toml::find_or <float> (tnml, "ks_epsf",     -1.0 );
-  if (ks) gx = false;
-  
-  tnml = nml;
   if (nml.contains("KREHM")) tnml = toml::find (nml, "KREHM");
   
   krehm             = toml::find_or <bool>  (tnml, "krehm",     false );
-  if(krehm) gx = false;
   rho_i             = toml::find_or <float> (tnml, "rho_i",       1.0 );
   d_e               = toml::find_or <float> (tnml, "d_e",         1.0 );
   nu_ei             = toml::find_or <float> (tnml, "nu_ei",       0.0 );
@@ -269,16 +236,8 @@ void Parameters::get_nml_vars(char* filename)
   init_single = toml::find_or <bool>   (tnml, "init_single", false );
   ikx_single  = toml::find_or <int>    (tnml, "ikx_single",      0 );
   iky_single  = toml::find_or <int>    (tnml, "iky_single",      1 );
-  ikx_fixed   = toml::find_or <int>    (tnml, "ikx_fixed",      -1 );
-  iky_fixed   = toml::find_or <int>    (tnml, "iky_fixed",      -1 );
-  eqfix       = toml::find_or <bool>   (tnml, "eqfix",       false );
-  secondary   = toml::find_or <bool>   (tnml, "secondary",   false );
   phi_ext     = toml::find_or <float>  (tnml, "phi_ext",       0.0 );
   source      = toml::find_or <string> (tnml, "source",  "default" );
-  tp_t0       = toml::find_or <float>  (tnml, "t0",           -1.0 );
-  tp_tf       = toml::find_or <float>  (tnml, "tf",           -1.0 );
-  tprim0      = toml::find_or <float>  (tnml, "tprim0",       -1.0 );
-  tprimf      = toml::find_or <float>  (tnml, "tprimf",       -1.0 );
   hegna       = toml::find_or <bool>   (tnml, "hegna",       false );
   use_NCCL    = toml::find_or <bool>   (tnml, "use_NCCL",    true );
   use_fft_callbacks    = toml::find_or <bool>   (tnml, "use_fft_callbacks",    false );
@@ -300,7 +259,7 @@ void Parameters::get_nml_vars(char* filename)
   nwrite_big  = toml::find_or <int>   (tnml, "nwrite_big", (long)  nwrite*100 );
   fixed_amplitude   = toml::find_or <bool> (tnml, "fixed_amplitude", false);
   write_omega       = toml::find_or <bool> (tnml, "omega",          false );
-  write_free_energy = toml::find_or <bool> (tnml, "free_energy",    true  ); if (ks) write_free_energy = false;
+  write_free_energy = toml::find_or <bool> (tnml, "free_energy",    true  );
   write_fluxes      = toml::find_or <bool> (tnml, "fluxes",         false );
   write_moms        = toml::find_or <bool> (tnml, "moments",           false );
   write_fields      = toml::find_or <bool> (tnml, "fields",         false );
@@ -427,10 +386,6 @@ void Parameters::get_nml_vars(char* filename)
   Btype                 = toml::find_or <string> (tnml, "Boltzmann_type", "electrons" );
   iphi00                = toml::find_or <int>    (tnml, "iphi00",                  -2 );
 
-  // Get the value of Z when running the Adkins collisional ETG equations
-
-  ion_z                 = toml::find_or <float>   (tnml, "Z_ion",                   1. );
-  
   // For backward compatibility, check if iphi00 was specified and act accordingly
   if (iphi00 > 0) {
     if (iphi00 == 1) Btype = "Ions";
@@ -515,11 +470,8 @@ void Parameters::get_nml_vars(char* filename)
   if(geo_option=="s-alpha" || geo_option=="slab" || geo_option=="const-curv" || igeo==0) {
     shat        = toml::find_or <float> (tnml, "shat",     0.8 );
   } else {
-    // shat will be taken from geometry file; do nothing here
-    //shat        = toml::find <float> (tnml, "shat");
-    //printf("Using the value of shat that appears in the .in file. \n");
-    //printf("Be sure it is consistent with the value in the geometry file. \n");
-    //printf("Using shat = %f \n",shat);
+    // For file-based geometry, shat always comes from the geometry file; any "shat" in the
+    // input file is ignored.
   }
 
   RBzeta_override = toml::find_or<float>( tnml, "RBzeta", 0.0 ); // For explicitly setting I(psi) for flying-slab simulations
@@ -590,106 +542,7 @@ void Parameters::get_nml_vars(char* filename)
   ei_colls = toml::find_or <bool> (tnml, "ei_colls", true);
   coll_conservation = toml::find_or <bool> (tnml, "coll_conservation", true);
 
-  gx = (!ks && !vp && !krehm && !cetg);
-  assert (!(ks && vp));
-  assert (ks || vp || gx || krehm || cetg);
-  
-//  wspectra.resize(nw_spectra);
-//  pspectra.resize(np_spectra);
-//  aspectra.resize(na_spectra);
-//  qspectra.resize(nq_spectra);
-//
-//  wspectra.assign(nw_spectra, 0);
-//  pspectra.assign(np_spectra, 0);
-//  aspectra.assign(na_spectra, 0);
-//  qspectra.assign(nq_spectra, 0);
-//
-//  tnml = nml;
-//  if (nml.contains("Wspectra")) tnml = toml::find (nml, "Wspectra");  
-//
-//  wspectra [WSPECTRA_species] = (toml::find_or <bool> (tnml, "species",          false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_kx]      = (toml::find_or <bool> (tnml, "kx",               false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_ky]      = (toml::find_or <bool> (tnml, "ky",               false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_kz]      = (toml::find_or <bool> (tnml, "kz",               false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_z]       = (toml::find_or <bool> (tnml, "z",                false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_l]       = (toml::find_or <bool> (tnml, "laguerre",         false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_m]       = (toml::find_or <bool> (tnml, "hermite",          false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_lm]      = (toml::find_or <bool> (tnml, "hermite_laguerre", false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_kperp]   = (toml::find_or <bool> (tnml, "kperp",            false)) == true ? 1 : 0;
-//  wspectra [WSPECTRA_kxky]    = (toml::find_or <bool> (tnml, "kxky",             false)) == true ? 1 : 0;
-//
-//  tnml = nml;
-//  if (nml.contains("Pspectra")) tnml = toml::find (nml, "Pspectra");  
-//
-//  pspectra [PSPECTRA_species] = (toml::find_or <bool> (tnml, "species",          false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_kx]      = (toml::find_or <bool> (tnml, "kx",               false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_ky]      = (toml::find_or <bool> (tnml, "ky",               false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_kz]      = (toml::find_or <bool> (tnml, "kz",               false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_z]       = (toml::find_or <bool> (tnml, "z",                false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_kperp]   = (toml::find_or <bool> (tnml, "kperp",            false)) == true ? 1 : 0;
-//  pspectra [PSPECTRA_kxky]    = (toml::find_or <bool> (tnml, "kxky",             false)) == true ? 1 : 0;
-//
-//  tnml = nml;
-//  if (nml.contains("Qspectra")) tnml = toml::find (nml, "Qspectra");  
-//
-//  qspectra [QSPECTRA_species] = (toml::find_or <bool> (tnml, "species",          false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_kx]      = (toml::find_or <bool> (tnml, "kx",               false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_ky]      = (toml::find_or <bool> (tnml, "ky",               false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_kz]      = (toml::find_or <bool> (tnml, "kz",               false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_z]       = (toml::find_or <bool> (tnml, "z",                false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_kperp]   = (toml::find_or <bool> (tnml, "kperp",            false)) == true ? 1 : 0;
-//  qspectra [QSPECTRA_kxky]    = (toml::find_or <bool> (tnml, "kxky",             false)) == true ? 1 : 0;
-//
-//  // if we have adiabatic ions, slave the aspectra to the wspectra as appropriate
-//  if (!all_kinetic) {
-//    aspectra [ ASPECTRA_species ] = wspectra [ WSPECTRA_species ];
-//    aspectra [ ASPECTRA_kx      ] = wspectra [ WSPECTRA_kx      ];
-//    aspectra [ ASPECTRA_ky      ] = wspectra [ WSPECTRA_ky      ];
-//    aspectra [ ASPECTRA_kz      ] = wspectra [ WSPECTRA_kz      ];
-//    aspectra [ ASPECTRA_z       ] = wspectra [ WSPECTRA_z       ];
-//    aspectra [ ASPECTRA_kperp   ] = wspectra [ WSPECTRA_kperp   ];
-//    aspectra [ ASPECTRA_kxky    ] = wspectra [ WSPECTRA_kxky    ];
-//  }
-//  // for backwards compatibility
-//  if (write_l_spectrum)  wspectra[WSPECTRA_l] = 1;
-//  if (write_h_spectrum)  wspectra[WSPECTRA_m] = 1;
-//  if (write_lh_spectrum) wspectra[WSPECTRA_lm] = 1;
-//  
-//  // Some diagnostics are not yet available:
-//  wspectra[ WSPECTRA_kperp] = 0;
-//  pspectra[ PSPECTRA_kperp] = 0;
-//  aspectra[ ASPECTRA_kperp] = 0;
-//  qspectra[ QSPECTRA_kperp] = 0;
-//  
-//  // If Wtot is requested, turn Ws, Ps, Phi2 on:
-//  if (write_free_energy) {
-//    wspectra[WSPECTRA_species] = 1;
-//    pspectra[PSPECTRA_species] = 1;
-//    if ( add_Boltzmann_species ) aspectra[ASPECTRA_species] = 1;
-//  }
-//
-//
-//  int ksize = 0;
-//  for (int k=0; k<pspectra.size(); k++) ksize = max(ksize, pspectra[k]);
-//  for (int k=0; k<wspectra.size(); k++) ksize = max(ksize, wspectra[k]);
-//  for (int k=0; k<aspectra.size(); k++) ksize = max(ksize, aspectra[k]);
-//  for (int k=0; k<qspectra.size(); k++) ksize = max(ksize, qspectra[k]);
-//
-//  tnml = nml;
-//  if (nml.contains("PZT")) tnml = toml::find (nml, "PZT");  
-//
-//  diagnosing_pzt = write_pzt;
-//  
-//  diagnosing_spectra = false;
-//  if (ksize > 0) diagnosing_spectra = true;
-//
-//  diagnosing_kzspec = false;
-//  if ((wspectra[ WSPECTRA_kz ] == 1) || (pspectra[ PSPECTRA_kz ] == 1) || (aspectra[ ASPECTRA_kz ] == 1)) {
-//    diagnosing_kzspec = true;
-//  }
-//  
-//  diagnosing_moments = false;
-//  if (write_moms || write_phi || write_phi_kpar) diagnosing_moments = true;
+  gx = !krehm;
   
   species_h = (specie *) malloc(nspec_in*sizeof(specie));
   if (nml.contains("species")) {
@@ -711,12 +564,6 @@ void Parameters::get_nml_vars(char* filename)
     species_h[0].temp = 1.0;
     species_h[0].mass = 1.0;
     species_h[0].type = 1;
-  } else if(cetg) {
-    species_h[0].mass = 1.0;
-    species_h[0].z    = 1.0;
-    species_h[0].dens = 1.0;
-    species_h[0].temp = 1.0;
-    species_h[0].type = 1; 
   }
   
   float numax = -1.;
@@ -724,32 +571,6 @@ void Parameters::get_nml_vars(char* filename)
   for (int i=0; i<nspec_in; i++) {numax = fmax(numax, species_h[i].nu_ss);}
   if (numax > 0.) collisions = true;
   
-  Reservoir = false;
-  add_noise = false;
-  ResFakeData = false;
-  ResWrite = false;
-  ResBatch = false;
-  
-  tnml = nml;
-  if (nml.contains("Reservoir")) tnml = toml::find (nml, "Reservoir");  
-
-  Reservoir          = toml::find_or <bool>  (tnml, "Use_reservoir",  false  );
-  ResQ               = toml::find_or <int>   (tnml, "Q",                 20  );
-  ResK               = toml::find_or <int>   (tnml, "K",                  3  );
-  ResTrainingSteps   = toml::find_or <int>   (tnml, "training_steps",     0  );
-  ResPredict_Steps   = toml::find_or <int>   (tnml, "prediction_steps", 200  );
-  ResTrainingDelta   = toml::find_or <int>   (tnml, "training_delta",     0  );
-  ResSpectralRadius  = toml::find_or <float> (tnml, "spectral_radius",  0.6  );
-  ResReg             = toml::find_or <float> (tnml, "regularization", 1.0e-4 );
-  ResSigma           = toml::find_or <float> (tnml, "input_sigma",      0.5  );
-  ResSigmaNoise      = toml::find_or <float> (tnml, "noise",           -1.0  );
-  ResFakeData        = toml::find_or <bool>  (tnml, "fake_data",      false  );
-  ResWrite           = toml::find_or <bool>  (tnml, "write",          false  );
-  ResBatch           = toml::find_or <bool>  (tnml, "batch",          false  );
-  
-  if (ResTrainingSteps == 0) ResTrainingSteps = nstep/nwrite;
-  if (ResTrainingDelta == 0) ResTrainingDelta = nwrite;
-  if (ResSigmaNoise > 0.) add_noise = true;
 
   
   if(nz_in != 1) {
@@ -757,11 +578,7 @@ void Parameters::get_nml_vars(char* filename)
     nz_in = 2*ntgrid; // force even
   }
   
-  //Zp = 2*nperiod - 1; // BD This needs updating
-  
-  // BD  This is messy. Prefer to go back to original method
-  // before, jtwist_old assumed Zp=1
-  // now, redefining jtwist = jtwist_old*Zp
+  // BD  Note: jtwist is now defined as jtwist_old*Zp; the older convention assumed Zp = 1.
 
   closure_model_opt = Closure::none   ;
   if( closure_model == "beer4+2") {
@@ -799,21 +616,6 @@ void Parameters::get_nml_vars(char* filename)
   if (scheme == "rk3")   scheme_opt = Tmethod::rk3;
   if (scheme == "sspx2") scheme_opt = Tmethod::sspx2;
 
-  if (eqfix && iproc==0 && scheme_opt == Tmethod::k10) {
-    printf("\n");
-    printf("\n");
-    printf(ANSI_COLOR_MAGENTA);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_GREEN);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RED);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_BLUE);
-    printf("The eqfix option is not compatible with this time-stepping algorithm. \n");
-    printf(ANSI_COLOR_RESET);    
-    printf("\n");
-    printf("\n");
-  }  
   //  printf("scheme_opt = %d \n",scheme_opt);
     
   if( source == "phiext_full") {
@@ -848,10 +650,7 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_grp(ncid,      "Inputs",         &nc_inputs)) ERR(retval);
   if (retval = nc_def_grp(nc_inputs, "Domain",         &nc_dom))    ERR(retval);  
   if (retval = nc_def_grp(nc_inputs, "Time",           &nc_time))   ERR(retval);  
-  if (retval = nc_def_grp(nc_inputs, "KS",             &nc_ks))     ERR(retval);  
-  if (retval = nc_def_grp(nc_inputs, "Vlasov_Poisson", &nc_vp))     ERR(retval);  
   if (retval = nc_def_grp(nc_inputs, "KREHM",          &nc_krehm))  ERR(retval);  
-  if (retval = nc_def_grp(nc_inputs, "collisionalETG", &nc_cetg))   ERR(retval);
   if (retval = nc_def_grp(nc_inputs, "Restart",        &nc_rst))    ERR(retval);  
   if (retval = nc_def_grp(nc_inputs, "Controls",       &nc_con))    ERR(retval);
   if (retval = nc_def_grp(nc_con,    "Numerical_Diss", &nc_diss))   ERR(retval);
@@ -859,7 +658,6 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_grp(nc_inputs, "Expert",         &nc_expert)) ERR(retval);  
   if (retval = nc_def_grp(nc_inputs, "Diagnostics",    &nc_diag))   ERR(retval);  
   if (retval = nc_def_grp(nc_inputs, "Resize",         &nc_resize)) ERR(retval);  
-  if (retval = nc_def_grp(nc_inputs, "Reservoir",      &nc_ml))     ERR(retval);
   if (retval = nc_def_grp(nc_inputs, "Species",        &nc_spec))   ERR(retval);
   if (retval = nc_def_grp(nc_spec,   "Boltzmann",      &nc_bz))     ERR(retval);  
 
@@ -884,20 +682,7 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_var (nc_time, "navg",         NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_time, "nsave",        NC_INT,   0, NULL, &ivar)) ERR(retval);
 
-  if (retval = nc_def_var (nc_ks, "ks",         NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "write_ks",   NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "eps_ks",     NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "ks_t0",      NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "ks_tf",      NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "ks_eps0",    NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ks, "ks_epsf",    NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
 
-  if (retval = nc_def_var (nc_vp, "vp",         NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_vp, "vp_closure", NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_vp, "vp_nu",      NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_vp, "vp_nuh",     NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_vp, "vp_alpha",   NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_vp, "vp_alpha_h", NC_INT,   0, NULL, &ivar)) ERR(retval);
 
   if (retval = nc_def_var (nc_krehm, "krehm",   NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_krehm, "rho_i",   NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
@@ -905,7 +690,6 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_var (nc_krehm, "nu_ei",   NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_krehm, "zt",      NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
 
-  if (retval = nc_def_var (nc_cetg, "cetg",     NC_INT,   0, NULL, &ivar)) ERR(retval);
   
   specs[0] = nc_dims->species;
   if (retval = nc_def_var (nc_spec, "species_type", NC_INT,   1, specs, &ivar)) ERR(retval);
@@ -929,19 +713,6 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_var (nc_dom, "ExBshear_phase",      NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_dom, "long_wavelength_GK",      NC_INT,   0, NULL, &ivar)) ERR(retval);
 
-  if (retval = nc_def_var (nc_ml, "Use_reservoir",  NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "Q",              NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "K",              NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "TrainingSteps",  NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "PredictSteps",   NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "TrainingDelta",  NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "SpecRadius",     NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "Regularizer",    NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "InputSigma",     NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "SigmaNoise",     NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "FakeData",       NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "ResWrite",       NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_ml, "ResBatch",       NC_INT,   0, NULL, &ivar)) ERR(retval);
   
   if (retval = nc_def_var (nc_rst, "scale",            NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_rst, "restart",          NC_INT,   0, NULL, &ivar)) ERR(retval);
@@ -1053,22 +824,13 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   if (retval = nc_def_var (nc_expert, "init_single",           NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "ikx_single",            NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "iky_single",            NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "ikx_fixed",             NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "iky_fixed",             NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "eqfix",                 NC_INT,   0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "secondary",             NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "phi_ext",               NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "t0",                    NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "tf",                    NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "tprim0",                NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
-  if (retval = nc_def_var (nc_expert, "tprimf",                NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_expert, "source_dum",            NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_put_att_text (nc_expert, ivar, "value", source.size(), source.c_str())) ERR(retval);
   if (retval = nc_def_var (nc_expert, "hegna",                 NC_INT,   0, NULL, &ivar)) ERR(retval);  // bb6126 - hegna test
 
   // for boltzmann opts need attribute BD bug
 
-  if (retval = nc_def_var (nc_bz, "Z_ion",                 NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_bz, "tau_fac",               NC_FLOAT, 0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_bz, "add_Boltzmann_species", NC_INT,   0, NULL, &ivar)) ERR(retval);
   if (retval = nc_def_var (nc_bz, "all_kinetic",           NC_INT,   0, NULL, &ivar)) ERR(retval);
@@ -1143,24 +905,10 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   putint  (nc_resize, "nm_add"       , nm_add        );  
   putint  (nc_resize, "ns_add"       , ns_add        );  
   
-  putbool  (nc_ml, "Use_reservoir", Reservoir         );
-  putint   (nc_ml, "Q"            , ResQ              );
-  putint   (nc_ml, "K"            , ResK              );
-  putint   (nc_ml, "TrainingSteps", ResTrainingSteps  );
-  putint   (nc_ml, "PredictSteps" , ResPredict_Steps  );
-  putint   (nc_ml, "TrainingDelta", ResTrainingDelta  );
-  put_real (nc_ml, "SpecRadius"   , ResSpectralRadius );
-  put_real (nc_ml, "Regularizer"  , ResReg            );
-  put_real (nc_ml, "InputSigma"   , ResSigma          );
-  put_real (nc_ml, "SigmaNoise"   , ResSigmaNoise     );
-  putbool  (nc_ml, "FakeData"     , ResFakeData       );
-  putbool  (nc_ml, "ResWrite"     , ResWrite          );
-  putbool  (nc_ml, "ResBatch"     , ResBatch          );
   
   putbool  (nc_bz, "all_kinetic",           all_kinetic           );
   putbool  (nc_bz, "add_Boltzmann_species", add_Boltzmann_species );
   put_real (nc_bz, "tau_fac",               tau_fac               );
-  put_real (nc_bz, "Z_ion",                 ion_z                 );
 
   put_real (nc_dom, "y0",      y0      );
   put_real (nc_dom, "x0",      x0      );
@@ -1178,22 +926,8 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
   putint   (nc_time, "nwrite",      nwrite      );
   putint   (nc_time, "nwrite_big",  nwrite_big  );
   
-  putbool  (nc_ks, "ks",       ks       );
-  putbool  (nc_ks, "write_ks", write_ks );
-  put_real (nc_ks, "eps_ks",   eps_ks   );
-  put_real (nc_ks, "ks_t0",    ks_t0    );
-  put_real (nc_ks, "ks_tf",    ks_tf    );
-  put_real (nc_ks, "ks_eps0",  ks_eps0  );
-  put_real (nc_ks, "ks_epsf",  ks_epsf  );
 
-  putbool  (nc_vp, "vp",         vp          );
-  putbool  (nc_vp, "vp_closure", vp_closure  );
-  putint   (nc_vp, "vp_alpha",   vp_alpha    );
-  putint   (nc_vp, "vp_alpha_h", vp_alpha_h  );
-  put_real (nc_vp, "vp_nu",      vp_nu       );
-  put_real (nc_vp, "vp_nuh",     vp_nuh      );
 
-  putbool  (nc_cetg,  "cetg", cetg);
   putbool  (nc_krehm, "krehm", krehm);
   put_real (nc_krehm, "rho_i", rho_i);
   put_real (nc_krehm, "d_e", d_e);
@@ -1248,19 +982,11 @@ void Parameters::store_ncdf(int ncid, NcDims *nc_dims) {
 
   putint   (nc_expert, "nreal",   nreal);
   putint   (nc_expert, "i_share", i_share);
-  putint   (nc_expert, "ikx_fixed",  ikx_fixed  );
-  putint   (nc_expert, "iky_fixed",  iky_fixed  );
-  putbool  (nc_expert, "eqfix",      eqfix      );
   putbool  (nc_expert, "init_single", init_single  );
-  putbool  (nc_expert, "secondary",   secondary    );
   putbool  (nc_expert, "hegna",       hegna        );
   put_real (nc_expert, "phi_ext",     phi_ext      );
   putint   (nc_expert, "ikx_single",  ikx_single   );
   putint   (nc_expert, "iky_single",  iky_single   );
-  put_real (nc_expert, "t0",          tp_t0        );
-  put_real (nc_expert, "tf",          tp_tf        );
-  put_real (nc_expert, "tprim0",      tprim0       );
-  put_real (nc_expert, "tprimf",      tprimf       );
 
   putint   (nc_con,  "stages",          stages          );
   put_real (nc_con,  "cfl",             cfl             );
@@ -1417,66 +1143,6 @@ void Parameters::put_real (int ncid, const char varname[], float val) {
   if (debug) printf("%s = %f \n",varname, val);
   if (retval = nc_inq_varid(ncid, varname, &idum))   ERR(retval);
   if (retval = nc_put_var  (ncid, idum, &val)) ERR(retval);
-}
-
-void Parameters::put_wspectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  wspectra_start[0] = 0;
-  wspectra_count[0] = nw_spectra;
-
-  if (retval = nc_inq_varid(ncid, "wspectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, wspectra_start, wspectra_count, s.data())) ERR(retval);
-}
-
-void Parameters::put_pspectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  pspectra_start[0] = 0;
-  pspectra_count[0] = np_spectra;
-
-  if (retval = nc_inq_varid(ncid, "pspectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, pspectra_start, pspectra_count, s.data())) ERR(retval);
-}
-
-void Parameters::put_aspectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  aspectra_start[0] = 0;
-  aspectra_count[0] = na_spectra;
-
-  if (retval = nc_inq_varid(ncid, "aspectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, aspectra_start, aspectra_count, s.data())) ERR(retval);
-}
-
-void Parameters::put_qspectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  qspectra_start[0] = 0;
-  qspectra_count[0] = nq_spectra;
-
-  if (retval = nc_inq_varid(ncid, "qspectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, qspectra_start, qspectra_count, s.data())) ERR(retval);
-}
-
-void Parameters::put_gamspectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  gamspectra_start[0] = 0;
-  gamspectra_count[0] = ngam_spectra;
-
-  if (retval = nc_inq_varid(ncid, "gamspectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, gamspectra_start, gamspectra_count, s.data())) ERR(retval);
-}
-
-void Parameters::put_phi2spectra (int ncid, std::vector<int> s) {
-
-  int idum, retval;
-  phi2spectra_start[0] = 0;
-  phi2spectra_count[0] = nphi2_spectra;
-
-  if (retval = nc_inq_varid(ncid, "phi2spectra", &idum))     ERR(retval);
-  if (retval = nc_put_vara (ncid, idum, phi2spectra_start, phi2spectra_count, s.data())) ERR(retval);
 }
 
 void Parameters::putspec (int  ncid, int nspec, specie* spec) {

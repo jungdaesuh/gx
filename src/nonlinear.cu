@@ -4,7 +4,6 @@
 #define GBX <<< dGx, dBx >>>
 #define GBX_single <<< dGx_single, dBx_single >>>
 #define GBX_ntft <<<dGx_ntft, dBx_ntft >>>
-#define GBX_single_ntft <<<dGx_single_ntft, dBx_single_ntft>>>
 
 //===========================================
 // Nonlinear_GK
@@ -104,9 +103,7 @@ Nonlinear_GK::Nonlinear_GK(Parameters* pars, Grids* grids, Geometry* geo) :
 
   fXY = dphi; // this is just a pointer for use in diagnostics
 
-  int nxyz = grids_->NxNyNz;
   int nlag = grids_->Nj;
-  int nher = grids_->Nm;
 
   int nbx = 256;  int ngx = 1 + (grids_->NxNyNz*grids_->Nj - 1)/nbx;
   int nby = 1;  int ngy = 1;
@@ -136,12 +133,6 @@ Nonlinear_GK::Nonlinear_GK(Parameters* pars, Grids* grids, Geometry* geo) :
   dBk = dim3(nbx, nby, 1);
   dGk = dim3(ngx, ngy, 1);
 
-  cfl_x_inv = (float) grids_->Nx/2 / (pars_->cfl * pars_->x0);
-  cfl_y_inv = (float) grids_->Ny/2 / (pars_->cfl * pars_->y0); 
-//  cfl_x_inv = (float) grids_->Nx / (pars_->cfl * 2 * M_PI * pars_->x0);
-//  cfl_y_inv = (float) grids_->Ny / (pars_->cfl * 2 * M_PI * pars_->y0);
-  
-  dt_cfl = 0.;
 
   red_d_temp_storage = nullptr;
   red_temp_storage_bytes = 0;
@@ -315,7 +306,7 @@ void Nonlinear_GK::nlps(MomentsG* G, Fields* f, MomentsG* G_res)
 void Nonlinear_GK::get_max_frequency(Fields *f, double *omega_max)
 {
   float vpar_max = grids_->vpar_max*pars_->vtmax; // estimate of max vpar on grid
-  float muB_max = grids_->muB_max*pars_->tzmax; 
+  float muB_max = grids_->muB_maxJ*pars_->tzmax; 
   grad_perp_f -> dxC2R(f->phi, dphi); 
   abs <<<dGx.x,dBx.x>>> (dphi, grids_->NxNyNz);
 
@@ -428,10 +419,6 @@ Nonlinear_KREHM::Nonlinear_KREHM(Parameters* pars, Grids* grids) :
   dBk = dim3(nbx, 1, 1);
   dGk = dim3(ngx, 1, 1);
 
-  cfl_x_inv = (float) grids_->Nx / (pars_->cfl * 2 * M_PI * pars_->x0);
-  cfl_y_inv = (float) grids_->Ny / (pars_->cfl * 2 * M_PI * pars_->y0); 
-  
-  dt_cfl = 0.;
 
   rho_s = pars->rho_s;
   d_e = pars->d_e;
@@ -539,117 +526,4 @@ void Nonlinear_KREHM::get_max_frequency(Fields *f, double *omega_max)
   //printf("omega_max[0]= %lf \n omega_max[1]= %lf\n", omega_max[0], omega_max[1]);
   //printf("kx_max*vmax_x[0] = %lf \n  grids_->ky_max*vmax_x[0] = %lf \n\n", (grids_->kx_max*vmax_x[0])*scale, (grids_->ky_max*vmax_y[0])*scale);
 }
-
-//==============================================
-// Nonlinear_cetg
-// object for handling non-linear terms in cetg
-//==============================================
-Nonlinear_cetg::Nonlinear_cetg(Parameters* pars, Grids* grids) :
-  pars_(pars), grids_(grids), red(nullptr)
-{
-  dG = nullptr;
-  dg_dx = nullptr;
-  dg_dy = nullptr;
-  dphi_dx = nullptr;
-  dphi_dy = nullptr;
-
-  nBatch = 2*grids_->Nz; 
-  grad_perp_G =     new GradPerp(pars_, grids_, nBatch, 2 * grids_->NxNycNz); 
-
-  nBatch = grids_->Nz; 
-  grad_perp_f = new GradPerp(pars_, grids_, nBatch, grids_->NxNycNz);
-
-  std::vector<int32_t> modes{'r', 'x', 'z'};
-  std::vector<int32_t> modesRed{};
-  red = new Reduction<float>(grids_, modes, modesRed); 
-
-  checkCuda(cudaMalloc(&dG,    sizeof(float)*2*grids_->NxNyNz));
-  checkCuda(cudaMalloc(&dg_dx, sizeof(float)*2*grids_->NxNyNz));
-  checkCuda(cudaMalloc(&dg_dy, sizeof(float)*2*grids_->NxNyNz));
-
-  checkCuda(cudaMalloc(&dphi_dx,  sizeof(float)*grids_->NxNyNz));
-  checkCuda(cudaMalloc(&dphi_dy,  sizeof(float)*grids_->NxNyNz));
-
-  checkCuda(cudaMemset(dG,    0., sizeof(float)*2*grids_->NxNyNz));
-  checkCuda(cudaMemset(dg_dx, 0., sizeof(float)*2*grids_->NxNyNz));
-  checkCuda(cudaMemset(dg_dy, 0., sizeof(float)*2*grids_->NxNyNz));
-
-  checkCuda(cudaMemset(dphi_dx,  0., sizeof(float)*grids_->NxNyNz));
-  checkCuda(cudaMemset(dphi_dy,  0., sizeof(float)*grids_->NxNyNz));
-
-  checkCuda(cudaMalloc(&val1,  sizeof(float)));
-  cudaMemset(val1, 0., sizeof(float));
-
-  int nxyz = grids_->NxNyNz;
-
-  int nbx = min(256, nxyz);  int ngx = 1 + (nxyz-1)/nbx; 
-  int nby = 1;               int ngy = 1; 
-  int nbz = 1;               int ngz = 1;  
-
-  dBx = dim3(nbx, nby, nbz);
-  dGx = dim3(ngx, ngy, ngz);
-
-  dBx_single = dim3(nbx, 1, 1);
-  dGx_single = dim3(ngx, 1, 1);
-
-  int nxkyz = grids_->NxNycNz;
-  
-  nbx = min(128, nxkyz);      ngx = 1 + (nxkyz-1)/nbx;
-
-  dBk = dim3(nbx, 1, 1);
-  dGk = dim3(ngx, 1, 1);
-
-  cfl_x_inv = (float) grids_->Nx / (pars_->cfl * 2 * M_PI * pars_->x0);
-  cfl_y_inv = (float) grids_->Ny / (pars_->cfl * 2 * M_PI * pars_->y0); 
-  
-  dt_cfl = 0.;
-
-}
-
-Nonlinear_cetg::~Nonlinear_cetg() 
-{
-  if ( grad_perp_f ) delete grad_perp_f;
-  if ( grad_perp_G ) delete grad_perp_G;
-  if ( dg_dx )   cudaFree ( dg_dx );
-  if ( dg_dy )   cudaFree ( dg_dy );
-  if ( dG )      cudaFree ( dG );
-  if ( dphi_dx ) cudaFree ( dphi_dx );
-  if ( dphi_dy ) cudaFree ( dphi_dy );
-  if ( val1 )    cudaFree ( val1 ); 
-  if ( red ) delete red;
-}
-
-void Nonlinear_cetg::nlps(MomentsG* G, Fields* f, MomentsG* G_nl)
-{
-  grad_perp_f->dxC2R(f->phi, dphi_dx);
-  grad_perp_f->dyC2R(f->phi, dphi_dy);
-
-  grad_perp_G->dxC2R(G->G(), dg_dx);
-  grad_perp_G->dyC2R(G->G(), dg_dy);      
-
-  // compute {g, phi} / 2.
-  bracket_cetg GBX (dG, dg_dx, dphi_dy, dg_dy, dphi_dx, 0.5);
-  // NL = {g, phi} / 2. 
-  grad_perp_G->R2C(dG, G_nl->G(), false); // this R2C has accumulate=false
-
-}
-
-void Nonlinear_cetg::get_max_frequency(Fields *f, double *omega_max)
-{
-
-  grad_perp_f -> dxC2R(f->phi, dphi_dx); 
-  abs <<<dGx.x,dBx.x>>> (dphi_dx, grids_->NxNyNz);
-  red->Max(dphi_dx, val1); 
-  CP_TO_CPU(vmax_y, val1, sizeof(float));
-
-  grad_perp_f -> dyC2R(f->phi, dphi_dy);  
-  abs <<<dGx.x,dBx.x>>> (dphi_dy, grids_->NxNyNz);
-  red->Max(dphi_dy, val1); 
-  CP_TO_CPU(vmax_x, val1, sizeof(float));
-
-  double scale = 1.0;  // normalization scaling factor for C2R FFT
-  omega_max[0] = fmax(omega_max[0], (grids_->kx_max*vmax_x[0])*scale);
-  omega_max[1] = fmax(omega_max[1], (grids_->ky_max*vmax_y[0])*scale);
-}
-
 

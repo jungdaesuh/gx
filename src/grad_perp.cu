@@ -1,7 +1,6 @@
 #include "grad_perp.h"
 #include "device_funcs.h"
 #include "get_error.h"
-#define GBK <<< dGk, dBk >>>
 #define GBK_ntft <<< dGk_ntft, dBk_ntft >>>
 #define GBX_ntft <<< dGx_ntft, dBx_ntft >>>
 #define GBX_single_ntft <<< dGx_single_ntft, dBx_single_ntft >>>
@@ -133,8 +132,6 @@ GradPerp::GradPerp(Parameters* pars, Grids* grids, int batch_size, int mem_size,
 GradPerp::~GradPerp()
 {
   if (tmp)      cudaFree (tmp);
- // if (iKxtmp)   cudaFree (iKxtmp);
- // if (iKxtmp2)  cudaFree (iKxtmp2);
   cufftDestroy ( gradperp_plan_R2C    );
   cufftDestroy ( gradperp_plan_C2R    );
   cufftDestroy ( gradperp_plan_dxC2R  );

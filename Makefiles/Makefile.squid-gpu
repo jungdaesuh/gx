@@ -1,0 +1,43 @@
+# Host: squid at D3 Center, Osaka-U
+#       Intel Xeon Platinum 8368 (2.4GHz/38core)x2
+#       NVIDIA A100x8
+#       
+# module load BaseGPU
+# module load hdf5/1.14.6.mpi
+# module load netcdf-c/4.10.0.mpi
+
+# netcdf
+NETCDF_LIB = -lnetcdf
+
+# mpi
+MPI_LIB = -lmpi
+
+# gsl
+GSL_INC = -I/usr/include
+GSL_LIB = -lgsl -lgslcblas
+
+# CUDA
+CUDA_INC = -I${NVHPC_ROOT}/math_libs/include -I${NVHPC_ROOT}/comm_libs/include
+#CUDA_LIB = -L${NVHPC_ROOT}/math_libs/lib64 -lcudart -lcufft_static -lculibos -lnvToolsExt -lcublas -lcusolver -lgomp -lcutensor -L${NVHPC_ROOT}/comm_libs/nccl/lib -lnccl 
+CUDA_LIB = -L${NVHPC_ROOT}/math_libs/lib64 -lcudart -lcufft_static -lculibos -lcublas -lcusolver -lgomp -lcutensor -L${NVHPC_ROOT}/comm_libs/nccl/lib -lnccl 
+
+# additional c libraries required for linking. hopefully these are already in LD_LIBRARY_PATH
+C_LIB = -L/usr/lib64 -lm -lpthread -ldl
+
+# A100 is compute architecture 8.0
+CUDAARCH=80
+
+CXX = g++
+
+NVCC   = nvcc
+CFLAGS = -fPIC --std=c++17
+NVCCFLAGS = --std=c++17 --forward-unknown-to-host-compiler -gencode arch=compute_$(CUDAARCH),code=sm_$(CUDAARCH) -use_fast_math -fPIC -rdc=true
+#LDFLAGS += -dlto
+
+ifeq ($(debug),on)
+  NVCCFLAGS += -g -G 
+else
+  NVCCFLAGS += -O3
+endif
+
+

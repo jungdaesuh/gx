@@ -204,28 +204,7 @@ The ``[Diagnostics]`` group controls the diagnostic quantities that are computed
    nwrite = 1000                   # write diagnostics every 1000 timesteps
    omega  = true                   # compute and write growth rates and frequencies
 
-
-  # spectra of W = |G_lm|**2
-  [Wspectra]
-   species          = false
-   hermite          = false
-   laguerre         = false
-   hermite_laguerre = true          # W(l,m) (summed over kx, ky, z)
-   kx               = false
-   ky               = true          # W(ky) (summed over kx, z, l, m)
-   kxky             = false
-   z                = false
-  
-  # spectra of P = ( 1 - Gamma_0(b_s) ) |Phi|**2
-  [Pspectra]
-   species          = false
-   kx               = false
-   ky               = true         # P(ky) (summed over kx, z)
-   kxky             = false
-   z                = true         # P(z) (summed over kx, ky)
-
-
-For linear calculations, we can request to compute and write growth rates and real frequencies by using ``omega = true``. Additionally, various spectra can be computed as specified by the ``[Wspectra]`` and ``[Pspectra]`` groups.
+For linear calculations, we can request to compute and write growth rates and real frequencies by using ``omega = true``.
 
 Running the simulation
 ----------------------

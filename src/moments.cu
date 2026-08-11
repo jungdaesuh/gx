@@ -1,6 +1,3 @@
-#include <random>
-#include <algorithm>
-#include <vector>
 #include "ncdf.h"
 #include "moments.h"
 #define GALL <<< dG_all, dB_all >>>
@@ -17,7 +14,6 @@ MomentsG::MomentsG(Parameters* pars, Grids* grids, int is_glob) :
   
   DEBUGPRINT("Allocated a G_lm array of size %.2f MB\n", lhsize/1024./1024.);
 
-  // int Nm = grids_->Nm;
   int Nl = grids_->Nl;
 
   // set up pointers for named moments that point to parts of G_lm
@@ -48,40 +44,7 @@ MomentsG::MomentsG(Parameters* pars, Grids* grids, int is_glob) :
 
   int nn1, nn2, nn3, nt1, nt2, nt3, nb1, nb2, nb3;
   
-  if (pars_->ks) {
-
-    printf("initializing Kuramoto-Sivashinsky\n");
-    nn1 = grids_->Nyc;                 nt1 = min(nn1, 128);    nb1 = 1 + (nn1-1)/nt1;
-    nn2 = 1;                           nt2 = min(nn2,   1);    nb2 = 1 + (nn2-1)/nt2;
-    nn3 = 1;                           nt3 = min(nn3,   1);    nb3 = 1 + (nn3-1)/nt3;
-    
-    dB_all   = dim3(nt1, nt2, nt3);    dG_all   = dim3(nb1, nb2, nb3);
-    dimBlock = dim3(nt1, nt2, nt3);    dimGrid  = dim3(nb1, nb2, nb3);
-    return;
-  } 
-
-  if (pars_->vp) {
-    printf("initializing Vlasov-Poisson\n");
-    nn1 = grids_->Nyc;                 nt1 = min(nn1, 128);    nb1 = 1 + (nn1-1)/nt1;
-    nn2 = 1;                           nt2 = min(nn2,   1);    nb2 = 1 + (nn2-1)/nt2;
-    nn3 = 1;                           nt3 = min(nn3,   1);    nb3 = 1 + (nn3-1)/nt3;
-    
-    dB_all   = dim3(nt1, nt2, nt3);
-    dG_all   = dim3(nb1, nb2, nb3);
-    return;
-  }
-  
-  //    nn1 = grids_->NxNycNz;      nt1 = min(32, nn1);  nb1 = 1 + (nn1-1)/nt1;
-  //    nn2 = 1;                    nt2 = min( 4, Nl);   nb2 = 1 + (nn2-1)/nt2;
-  //    nn3 = 1;                    nt3 = min( 4, Nm);   nb3 = 1 + (nn3-1)/nt3;
-  
-  //    dimBlock = dim3(nt1, nt2, nt3);
-  //    dimGrid  = dim3(nb1, nb2, nb3);
-  
-  //    dimBlock = dim3(32, min(4, Nl), min(4, Nm));
-  //    dimGrid  = dim3((grids_->NxNycNz-1)/dimBlock.x+1, 1, 1);
-  
-  nn1 = grids_->Nyc*grids_->Nx;    nt1 = min(nn1, WARPSIZE);    nb1 = (nn1-1)/nt1 + 1;
+nn1 = grids_->Nyc*grids_->Nx;    nt1 = min(nn1, WARPSIZE);    nb1 = (nn1-1)/nt1 + 1;
   nn2 = grids_->Nz;                nt2 = min(nn2, (int) 512/WARPSIZE);    nb2 = (nn2-1)/nt2 + 1;
   nn3 = grids_->Nm*grids_->Nl;     nt3 = min(nn3,  1);    nb3 = (nn3-1)/nt3 + 1;
   
@@ -125,48 +88,6 @@ void MomentsG::initVP(double *time) {
   cudaDeviceSynchronize();
 }
 
-//void MomentsG::initialConditions(double *time) {
-//
-//  size_t momsize = sizeof(cuComplex)*grids_->NxNycNz;
-//  cuComplex *init_h = nullptr;
-//  init_h = (cuComplex*) malloc(momsize);
-//  
-//  std::random_device rd;
-//  std::mt19937 gen(rd());
-//  std::normal_distribution<float> ramp(0., pars_->init_amp);
-//
-//  for (int idy = 0; idy<grids_->Nyc; idy++) {
-//    init_h[idy].x = 0.;
-//    init_h[idy].y = 0.;
-//  }
-//  
-//  for (int idy = 1; idy<grids_->Naky; idy++) {
-//    init_h[idy].x = ramp(gen);
-//    init_h[idy].y = ramp(gen);
-//  }
-//
-//  //  init_h[1].x =  0.5;
-//  //  init_h[2].y = -0.25;
-//  
-//  CP_TO_GPU(G_lm, init_h, momsize);
-//  
-//  free(init_h);
-//
-//  // restart_read goes here, if restart == T
-//  // as in gs2, if restart_read is true, we want to *add* the restart values to anything
-//  // that has happened above and also move the value of time up to the end of the previous run
-//  if(pars_->restart) {
-//    DEBUG_PRINT("reading restart file \n");
-//    this->restart_read(time);
-//  }
-//
-//  cudaDeviceSynchronize();
-//  //  checkCuda(cudaGetLastError());
-//
-//  //  return cudaGetLastError();
-//  
-//}
-
 void MomentsG::initialConditions(double* time) {
  
   checkCuda(cudaGetLastError());
@@ -183,10 +104,7 @@ void MomentsG::initialConditions(double* time) {
     init_h[idx].y = 0.;
   }
   
-  if (pars_->ks) {
-    init_h[1].x =  0.5;
-    init_h[2].y = -0.25;
-  } else {
+  {
   
     if(pars_->init_single) {
       //initialize single mode
@@ -244,7 +162,6 @@ void MomentsG::initialConditions(double* time) {
       float samp;
       int idx;
       //
-      //      printf("Hacking the initial condition! \n");
       //
       // Loop over the kx>=0 modes. Below, the kx<=0 modes are handled explicitly, to help with
       // specific phase relationships
@@ -282,7 +199,6 @@ void MomentsG::initialConditions(double* time) {
 		init_h[index].x *= cos(pars_->ikpar_init*z_h[k]/pars_->Zp);
 		init_h[index].y *= cos(pars_->ikpar_init*z_h[k]/pars_->Zp);
 	      }
-	      //	      printf("init_h[%d] = (%e, %e) \n",index,init_h[index].x,init_h[index].y);
 	    }
 	    if (pars_->random_init) {
 	      for (int k=0; k<grids_->Nz; k++) {
@@ -367,29 +283,22 @@ void MomentsG::scale(double    scalar) {scale_kernel GALL (G(), scalar);}
 void MomentsG::scale(cuComplex scalar) {scale_kernel GALL (G(), scalar);}
 void MomentsG::mask(void) {maskG GALL (G());}
 
-void MomentsG::rescale(float * phi_max) {
-  rescale_kernel GALL (G(), phi_max, grids_->Nm*grids_->Nl);
-}
-
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2,
 			  double c3, MomentsG* G3) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c2, MomentsG* G2,
 			  double c3, MomentsG* G3,
 			  double c4, MomentsG* G4) {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G());
 }
 
 void MomentsG::add_scaled(double c1, MomentsG* G1,
@@ -398,8 +307,7 @@ void MomentsG::add_scaled(double c1, MomentsG* G1,
 			  double c4, MomentsG* G4,
 			  double c5, MomentsG* G5)
 {
-  bool neqfix = !pars_->eqfix;
-  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), c5, G5->G(), neqfix);
+  add_scaled_kernel GALL (G(), c1, G1->G(), c2, G2->G(), c3, G3->G(), c4, G4->G(), c5, G5->G());
 }
 
 void MomentsG::reality()
@@ -734,7 +642,6 @@ void MomentsG::restart_read(double* time)
   }
   
   unsigned int itot;
-  //  itot = Nakx * Naky * Nz * Nm * Nl;
   itot = Nx * Nyc * Nz * Nm * Nl;
 
   unsigned int iitot = Nakx * Naky * Nz * Nm * Nl;
@@ -774,6 +681,12 @@ void MomentsG::restart_read(double* time)
   if (retval = nc_get_var(ncres, id_time, time)) ERR(retval);
   if (retval = nc_close(ncres)) ERR(retval);
 
+  if (isnan(time[0]) || isinf(time[0]) || fabs(time[0]) >= 1e10) {
+    fprintf(stderr, "RESTART ERROR: time variable contains invalid or uninitialized value: %e\n", time[0]);
+    exit(1);
+  }
+  DEBUG_PRINT("Restart time = %f\n", time[0]);
+
   scale = pars_->scale;
 
   if (!pars_->domain_change) {
@@ -805,7 +718,7 @@ void MomentsG::restart_read(double* time)
     int old_Naky = 1 +    (Ny/pars_->ny_mult - 1)/3;    int jj; 
     int old_Nakx = 1 + 2*((Nx/pars_->nx_mult - 1)/3);   int ii; 
     int old_Nx = Nx/pars_->nx_mult;
-    // int old_Nz = Nz/pars_->ntheta_mult; // not yet implemented
+    // TODO: rescaling from an old Nz (Nz/ntheta_mult) is not yet implemented.
     int old_Nm = Nm - pars_->nm_add;
     int old_Nl = Nl - pars_->nl_add;
     
@@ -862,55 +775,4 @@ void MomentsG::restart_read(double* time)
   mask();
   
   free(G_h);
-}
-
-void MomentsG::qvar(int N)
-{
-  cuComplex* G_h;
-  //  int Nk = grids_->Nyc;
-  //  Nk = 1;
-  int Nk = grids_->NxNycNz;
-  G_h = (cuComplex*) malloc (sizeof(cuComplex)*N);
-  for (int i=0; i<N; i++) {G_h[i].x = 0.; G_h[i].y = 0.;}
-  CP_TO_CPU (G_h, G_lm, N*sizeof(cuComplex));
-  printf("\n");
-  // for (int i=0; i<N; i++) printf("var(%d,%d) = (%e, %e) \n", i%Nk, i/Nk, G_h[i].x, G_h[i].y);
-  //  for (int i=N-20; i<N; i++) printf("var(%d) = (%e, %e) \n", i, G_h[i].x, G_h[i].y);
-  for (int i=0; i<N; i++) printf("m var(%d,%d) = (%e, %e) \n", i%Nk, i/Nk, G_h[i].x, G_h[i].y);
-  printf("\n");
-
-  free (G_h);
-}
-
-void MomentsG::update_tprim(double time) {
-
-  // this is a proof-of-principle hack. typically nothing will happen here
-
-  // for one species (or the first species in the species list):
-  // adjust tprim according to the function 
-  // if t < t0:
-  // tprim = tprim_0
-  // if t > t0: 
-  //    if (t < tf) tprim = tprim_0 + (tprim_0 - tprim_f)/(t0-tf)*(t-t0)
-  //    else tprim = tprim_f
-
-  if (pars_->tp_t0 > -0.5) {
-    if (time < (double) pars_->tp_t0) {
-      float tp = pars_->tprim0;
-      species->tprim = tp;
-    } else {
-      if (time < (double) pars_->tp_tf) {
-        float tfac = (float) time;
-        float tprim0 = pars_->tprim0;
-        float tprimf = pars_->tprimf;
-        float t0 = pars_->tp_t0;
-        float tf = pars_->tp_tf;
-        float tp = tprim0 + (tprim0-tprimf)/(t0-tf)*(tfac-t0);
-	species->tprim = tp;
-      } else {
-        float tp = pars_->tprimf;
-	species->tprim = tp;
-      }
-    }
-  }
 }

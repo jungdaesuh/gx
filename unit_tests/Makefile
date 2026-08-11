@@ -34,7 +34,7 @@ GTEST_FLAGS += -isystem $(GTEST_DIR)/include
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-UNIT_TESTS = test_main test_grids test_moments test_laguerre_transform test_grad_perp test_grad_parallel_linked test_nonlinear  test_linear test_solver # test_geometry test_trinity_interface test_grad_parallel_periodic test_grad_parallel_linked test_moments test_laguerre_transform test_grad_perp
+UNIT_TESTS = test_main test_gpu_defs test_grids test_moments test_laguerre_transform test_grad_perp test_grad_parallel_linked test_nonlinear  test_linear test_solver # test_geometry test_trinity_interface test_grad_parallel_periodic test_grad_parallel_linked test_moments test_laguerre_transform test_grad_perp
 REGRESSION_TESTS = #test_cyclone_linear_beer
 TESTS = $(UNIT_TESTS) $(REGRESSION_TESTS)
 
@@ -44,9 +44,6 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
 
 GX_HEADERS = $(GX_DIR)/include/*.h
-
-GX_OBJS = device_funcs.o parameters.o grids.o reductions.o reservoir.o grad_perp.o fields.o moments.o forcing.o grad_parallel.o grad_parallel_linked.o geometry.o laguerre_transform.o nca.o ncdf.o solver.o smith_par_closure.o closures.o linear.o nonlinear.o ts_sspx2.o ts_sspx3.o ts_rk2.o ts_rk4.o ts_k10.o ts_k2.o ts_g3.o diagnostics.o run_gx.o version.o trinity_interface.o
-GX_OBJS := $(addprefix $(GX_DIR)/obj/, $(GX_OBJS))
 
 VPATH=.:src
 

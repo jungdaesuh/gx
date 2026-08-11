@@ -1,0 +1,6 @@
+# Host: squid at D3 Center, Osaka-U
+ifndef GK_PROJECT
+  include Makefiles/Makefile.squid-gpu
+else
+  include Makefile.squid-cpu
+endif

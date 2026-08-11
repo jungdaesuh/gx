@@ -51,14 +51,13 @@ class Grids {
   float * theta0_h ;
   float * th0; 
   float Zp;
-  float kx_max, ky_max, kz_max, vpar_max, muB_max;
+  float kx_max, ky_max, kz_max, vpar_max, muB_max, muB_maxJ;
   int m0_max;
   float kperp_min;
 
   ncclComm_t ncclComm, ncclComm_s, ncclComm_m, ncclComm_m0;
   ncclUniqueId ncclId, ncclId_m0;
   std::vector<ncclUniqueId> ncclId_s, ncclId_m;
-  cudaStream_t ncclStream;
 
   int iproc, nprocs;
   int iproc_m, nprocs_m;
